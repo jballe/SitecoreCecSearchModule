@@ -19,7 +19,7 @@ jobs:
         $ver
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
-          ModuleVersion = $ver.NuGetVersionV2
+          ModuleVersion = $ver.MajorMinorPatch
         }
         if(("{0}" -f $ver.NuGetPreReleaseTagV2) -ne "") {
           $versionParams.Prerelase = $ver.NuGetPreReleaseTagV2
@@ -29,7 +29,9 @@ jobs:
     - name: Create NuGet package
       shell: pwsh
       run: |
-        Register-PSResourceRepository -Name nuget-local -URL (Join-Path $PWD "publish")
+        $repoPath = (Join-Path $PWD "publish")
+        If(-not (Test-Path $repoPath -PathType Container)) { New-Item $repoPath -ItemType Directory | Out-Null }
+        Register-PSResourceRepository -Name nuget-local -Uri $repoPath
         Publish-PSResource -Path ./src/SitecoreCecSearchModule -Repository "nuget-local"
         
     - uses: actions/upload-artifact@v3

@@ -1,0 +1,43 @@
+name: Sub Publish
+
+on:
+  workflow_call:
+
+jobs:
+  publish:
+    name: Publish prerelease
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Update version
+      shell: pwsh
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 5.*
+        $ver = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
+        Update-ModuleManifest -Path ./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1 -ModuleVersion $ver.NuGetVersion2 -Prerelase $ver.NuGetPreReleaseTagV2
+
+    - name: Create NuGet package
+      shell: pwsh
+      run: |
+        Register-PSResourceRepository -Name nuget-local -URL (Join-Path $PWD "publish")
+        Publish-PSResource -Path ./src/SitecoreCecSearchModule -Repository "nuget-local"
+        
+    - uses: actions/upload-artifact@v3
+      with:
+        name: Package
+        path: publish
+
+    - name: Upload as Github package
+      shell: pwsh
+      run: |
+        dotnet tool install --global gpr --version 0.1.281
+        gpr push -k ${{ secrets.GITHUB_TOKEN }} (Join-Path $PWD "publish" "*.nupkg" -Resolve) -r https://github.com/${{github.repository}}
+
+    #- name: Publish
+    #  shell: pwsh
+    #  env:
+    #    NUGET_KEY: ${{ secrets.PSGALLERY_SECRET }}
+    #  run: |
+    #    Publish-Module -path ./src/SitecoreCecSearchModule/1.0.0 -NuGetApiKey $env:NUGET_KEY -Verbose -ProjectUri -IconUri -AllowPrerelease

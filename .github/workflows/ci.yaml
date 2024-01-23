@@ -7,8 +7,8 @@ on:
 jobs:
   verify:
     name: Verify module
-    uses: ./.github/workflows/sub_verify.yml
+    uses: ./.github/workflows/sub_verify.yaml
 
   publish:
     name: Publish package
-    uses: ./.github/workflows/sub_publish.yml
+    uses: ./.github/workflows/sub_publish.yaml

@@ -24,4 +24,4 @@ jobs:
           Install-Module -Name Pester -Force -SkipPublisherCheck
       - name: Run ScriptAnalyzer
         shell: pwsh
-        run: Invoke-ScriptAnalyzer -Path src/SitecoreCecSearchModule/1.0.0 -IncludeDefaultRules -Recurse
+        run: Invoke-ScriptAnalyzer -Path src/SitecoreCecSearchModule -IncludeDefaultRules -Recurse

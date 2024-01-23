@@ -16,7 +16,15 @@ jobs:
       run: |
         dotnet tool install --global GitVersion.Tool --version 5.*
         $ver = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
-        Update-ModuleManifest -Path ./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1 -ModuleVersion $ver.NuGetVersion2 -Prerelase $ver.NuGetPreReleaseTagV2
+        $ver
+        $versionParams = @{
+          Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
+          ModuleVersion = "$ver.NuGetVersion2"
+        }
+        if(("{0}" -f $ver.NuGetPreReleaseTagV2) -ne "") {
+          $versionParams.Prerelase = $ver.NuGetPreReleaseTagV2
+        }
+        Update-ModuleManifest @versionParams
 
     - name: Create NuGet package
       shell: pwsh

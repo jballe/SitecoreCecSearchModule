@@ -16,5 +16,6 @@ jobs:
   publish_prerelease:
     name: Prerelease
     needs:
+      - verify
       - build
     uses: ./.github/workflows/sub_publish_prerelease.yaml

@@ -5,7 +5,7 @@ on:
 
 jobs:
   verify:
-    name: Verify module
+    name: Script Analyzer
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

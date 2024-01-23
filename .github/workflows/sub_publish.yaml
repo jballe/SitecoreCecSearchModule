@@ -33,7 +33,7 @@ jobs:
         $repoPath = (Join-Path $PWD "publish")
         If(-not (Test-Path $repoPath -PathType Container)) { New-Item $repoPath -ItemType Directory | Out-Null }
 
-        Install-Module Microsoft.PowerShell.PSResourceGet -Repository PSGallery
+        Install-Module Microsoft.PowerShell.PSResourceGet -Repository PSGallery -Force
         Register-PSResourceRepository -Name nuget-local -Uri $repoPath
         Publish-PSResource -Path ./src/SitecoreCecSearchModule -Repository "nuget-local"
         

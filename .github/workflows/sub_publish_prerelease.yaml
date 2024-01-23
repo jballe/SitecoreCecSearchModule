@@ -13,7 +13,7 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: Package
-        pattern: *.nupkg
+        pattern: '*.nupkg'
 
     - name: Upload Github package
       shell: pwsh

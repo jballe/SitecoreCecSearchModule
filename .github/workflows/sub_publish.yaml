@@ -19,7 +19,7 @@ jobs:
         $ver
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
-          ModuleVersion = $ver.NuGetVersion2
+          ModuleVersion = $ver.NuGetVersionV2
         }
         if(("{0}" -f $ver.NuGetPreReleaseTagV2) -ne "") {
           $versionParams.Prerelase = $ver.NuGetPreReleaseTagV2

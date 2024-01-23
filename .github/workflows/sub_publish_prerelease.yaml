@@ -12,8 +12,8 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Package
-        merge_multiple: true
+        name: package
+        merge-multiple: true
         #pattern: '*.nupkg'
 
     - name: Upload Github package

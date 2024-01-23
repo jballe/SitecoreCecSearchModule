@@ -24,7 +24,7 @@ jobs:
         if(("{0}" -f $ver.NuGetPreReleaseTagV2) -ne "") {
           $versionParams.Prerelease = $ver.NuGetPreReleaseTagV2
         }
-        
+
         Update-ModuleManifest @versionParams
 
     - name: Create NuGet package
@@ -32,6 +32,8 @@ jobs:
       run: |
         $repoPath = (Join-Path $PWD "publish")
         If(-not (Test-Path $repoPath -PathType Container)) { New-Item $repoPath -ItemType Directory | Out-Null }
+
+        Install-Module -Name PowerShellGet -AllowPrerelease -Force
         Register-PSResourceRepository -Name nuget-local -Uri $repoPath
         Publish-PSResource -Path ./src/SitecoreCecSearchModule -Repository "nuget-local"
         

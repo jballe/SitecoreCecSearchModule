@@ -4,18 +4,20 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: write
+  deployments: write
+  packages: write
+
+
 jobs:
   verify:
     name: Verify
     uses: ./.github/workflows/sub_verify.yaml
 
-  build:
-    name: Build
-    uses: ./.github/workflows/sub_build.yaml
-  
   publish_prerelease:
     name: Prerelease
     needs:
       - verify
-      - build
     uses: ./.github/workflows/sub_publish_prerelease.yaml

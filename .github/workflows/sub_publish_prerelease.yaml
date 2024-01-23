@@ -10,11 +10,44 @@ jobs:
     environment:
       name: gpr
     steps:
-    - uses: actions/download-artifact@v4
+    # - uses: actions/download-artifact@v4
+    #   with:
+    #     name: package
+    #     merge-multiple: true
+    #     #pattern: '*.nupkg'
+
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Update version
+      shell: pwsh
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 5.*
+        $ver = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
+        $versionParams = @{
+          Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
+          ModuleVersion = $ver.MajorMinorPatch
+        }
+        if(("{0}" -f $ver.NuGetPreReleaseTagV2) -ne "") {
+          $versionParams.Prerelease = $ver.NuGetPreReleaseTagV2
+        }
+
+        Update-ModuleManifest @versionParams
+
+    - name: Create NuGet package
+      shell: pwsh
+      run: |
+        $repoPath = (Join-Path $PWD "publish")
+        If(-not (Test-Path $repoPath -PathType Container)) { New-Item $repoPath -ItemType Directory | Out-Null }
+
+        Install-Module Microsoft.PowerShell.PSResourceGet -Repository PSGallery -Force
+        Register-PSResourceRepository -Name nuget-local -Uri $repoPath
+        Publish-PSResource -Path ./src/SitecoreCecSearchModule -Repository "nuget-local"
+        
+    - uses: actions/upload-artifact@v3
       with:
         name: package
-        merge-multiple: true
-        #pattern: '*.nupkg'
+        path: publish/*.nupkg
 
     - name: Upload Github package
       shell: pwsh
@@ -22,7 +55,7 @@ jobs:
         GPR_SECRET: ${{ secrets.GPR_SECRET }}
       run: |
         dotnet tool install --global gpr --version 0.1.294
-        gpr push -k "$env:GPR_SECRET" (Resolve-Path "*.nupkg") -r https://github.com/${{github.repository}}
+        gpr push -k "$env:GPR_SECRET" (Join-Path $PWD "publish" "*.nupkg" -Resolve) -r https://github.com/${{github.repository}}
 
     #- name: Publish
     #  shell: pwsh

@@ -22,8 +22,9 @@ jobs:
           ModuleVersion = $ver.MajorMinorPatch
         }
         if(("{0}" -f $ver.NuGetPreReleaseTagV2) -ne "") {
-          $versionParams.Prerelase = $ver.NuGetPreReleaseTagV2
+          $versionParams.Prerelease = $ver.NuGetPreReleaseTagV2
         }
+        
         Update-ModuleManifest @versionParams
 
     - name: Create NuGet package

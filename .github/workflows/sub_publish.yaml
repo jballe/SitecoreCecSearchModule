@@ -44,9 +44,11 @@ jobs:
 
     - name: Upload as Github package
       shell: pwsh
+      env:
+        GPR_SECRET: ${{ secrets.GPR_SECRET}}
       run: |
         dotnet tool install --global gpr --version 0.1.281
-        gpr push -k ${{ secrets.GPR_SECRET }} (Join-Path $PWD "publish" "*.nupkg" -Resolve) -r https://github.com/${{github.repository}}
+        gpr push -k ${env:GPR_SECRET} (Join-Path $PWD "publish" "*.nupkg" -Resolve) -r https://github.com/${{github.repository}}
 
     #- name: Publish
     #  shell: pwsh

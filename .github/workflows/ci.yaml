@@ -6,11 +6,15 @@ on:
 
 jobs:
   verify:
-    name: Verify module
+    name: Verify
     uses: ./.github/workflows/sub_verify.yaml
 
-  publish:
-    name: Publish package
+  build:
+    name: Build
+    uses: ./.github/workflows/sub_build.yaml
+  
+  publish_prerelease:
+    name: Prerelease
     needs:
-      - verify
-    uses: ./.github/workflows/sub_publish.yaml
+      - build
+    uses: ./.github/workflows/sub_publish_prerelease.yaml

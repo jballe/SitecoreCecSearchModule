@@ -1,11 +1,11 @@
-name: Sub Publish
+name: Sub Build
 
 on:
   workflow_call:
 
 jobs:
-  publish:
-    name: Publish prerelease
+  build:
+    name: Create nuget package
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -40,30 +40,3 @@ jobs:
       with:
         name: Package
         path: publish
-
-    - name: Upload as Github package
-      shell: pwsh
-      env:
-        GPR_SECRET: ${{ secrets.GPR_SECRET }}
-      run: |
-        dotnet tool install --global gpr --version 0.1.281
-        gpr push -k "$env:GPR_SECRET" (Join-Path $PWD "publish" "*.nupkg" -Resolve) -r https://github.com/${{github.repository}}
-
-    #- name: Publish
-    #  shell: pwsh
-    #  env:
-    #    NUGET_KEY: ${{ secrets.PSGALLERY_SECRET }}
-    #  run: |
-    #    Publish-Module -path ./src/SitecoreCecSearchModule/1.0.0 -NuGetApiKey $env:NUGET_KEY -Verbose -ProjectUri -IconUri -AllowPrerelease
-
-          
-    # - name: Create github release tag
-    #   if: success() && github.ref == 'refs/heads/master'
-    #   uses: actions/create-release@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     tag_name: v${{ env.BUILD_VERSION }}
-    #     release_name: Release v${{ env.BUILD_VERSION }}
-    #     draft: true
-    #     prerelease: false

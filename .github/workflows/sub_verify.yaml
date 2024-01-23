@@ -21,7 +21,7 @@ jobs:
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module PSScriptAnalyzer -Force
-          Install-Module -Name Pester -Force -SkipPublisherCheck
+          Install-Module -Name Pester -Force -SkipPublisherCheck 
       - name: Run ScriptAnalyzer
         shell: pwsh
-        run: Invoke-ScriptAnalyzer -Path src/SitecoreCecSearchModule -IncludeDefaultRules -Recurse
+        run: Invoke-ScriptAnalyzer -Path src/SitecoreCecSearchModule -IncludeDefaultRules -Recurse -EnableExit -ReportSummary -ExcludeRule PSAvoidTrailingWhitespace

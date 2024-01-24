@@ -49,7 +49,18 @@ jobs:
         name: package
         path: publish/*.nupkg
 
+    - name: Check for Secret availability
+      id: secret-check
+      shell: bash
+      run: |
+        if [ "${{ secrets.GPR_SECRET }}" != '' ]; then
+          echo "available=true" >> $GITHUB_OUTPUT;
+        else
+          echo "available=false" >> $GITHUB_OUTPUT;
+        fi
+
     - name: Upload Github package
+      if: ${{ steps.secret-check.outputs.available == 'true' }}
       shell: pwsh
       env:
         GPR_SECRET: ${{secrets.GPR_SECRET}}

@@ -18,7 +18,7 @@ jobs:
       shell: pwsh
       run: |
         dotnet tool install --global GitVersion.Tool --version 5.*
-        $ver = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
+        $ver = dotnet-gitversion /config .\bld\GitVersion.yml /output json /url https://github.com/${{github.GITHUB_REPOSITORY}} /b ${{github.GITHUB_REF}} /u ci /p ${{secrets.GITHUB_TOKEN}} | Out-String | ConvertFrom-Json
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
           ModuleVersion = $ver.MajorMinorPatch
@@ -27,7 +27,8 @@ jobs:
           $versionParams.Prerelease = $ver.NuGetPreReleaseTagV2
         }
 
-        Update-ModuleManifest @versionParams
+        Write-Host ("Update version to" -f $ver.NuGetVersionV2)
+        Update-ModuleManifest @versionParams -Verbose
 
     - name: Create NuGet package
       shell: pwsh

@@ -49,21 +49,23 @@ jobs:
         name: package
         path: publish/*.nupkg
 
-    - name: Check for Secret availability
-      id: secret-check
-      shell: bash
-      run: |
-        if [ "${{ secrets.GPR_SECRET }}" != '' ]; then
-          echo "available=true" >> $GITHUB_OUTPUT;
-        else
-          echo "available=false" >> $GITHUB_OUTPUT;
-        fi
+    #- name: Check for Secret availability
+    #  id: secret-check
+    #  shell: bash
+    #  run: |
+    #    if [ "${{ secrets.GPR_SECRET }}" != '' ]; then
+    #      echo "available=true" >> $GITHUB_OUTPUT;
+    #    else
+    #      echo "available=false" >> $GITHUB_OUTPUT;
+    #    fi
 
+    # GitHub Packages only supports authentication using a personal access token (classic)
+    # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry#authenticating-to-github-packages
     - name: Upload Github package
-      if: ${{ steps.secret-check.outputs.available == 'true' }}
+      #if: ${{ steps.secret-check.outputs.available == 'true' }}
       shell: pwsh
       env:
-        GPR_SECRET: ${{secrets.GPR_SECRET}}
+        GPR_SECRET: ${{secrets.GITHUB_TOKEN}}
       run: |
         dotnet tool install --global gpr --version 0.1.294
         gpr push -k "$env:GPR_SECRET" (Join-Path $PWD "publish" "*.nupkg" -Resolve) -r https://github.com/${{github.repository}}

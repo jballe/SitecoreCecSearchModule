@@ -5,9 +5,13 @@ on:
   workflow_dispatch:
 
 permissions:
+   # This is required for actions/checkout
   contents: read
+  # Allow cancel job
   actions: write
+  # Allow create new deployments
   deployments: write
+  # Allow upload package
   packages: write
 
 
@@ -21,3 +25,4 @@ jobs:
     needs:
       - verify
     uses: ./.github/workflows/sub_publish_prerelease.yaml
+    secrets: inherit

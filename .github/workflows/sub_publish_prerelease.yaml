@@ -12,6 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        fetch-tags: true
         fetch-depth: 0
     - name: Update version
       shell: pwsh

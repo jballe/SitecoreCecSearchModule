@@ -10,12 +10,6 @@ jobs:
     environment:
       name: gpr
     steps:
-    # - uses: actions/download-artifact@v4
-    #   with:
-    #     name: package
-    #     merge-multiple: true
-    #     #pattern: '*.nupkg'
-
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
@@ -49,20 +43,7 @@ jobs:
         name: package
         path: publish/*.nupkg
 
-    #- name: Check for Secret availability
-    #  id: secret-check
-    #  shell: bash
-    #  run: |
-    #    if [ "${{ secrets.GPR_SECRET }}" != '' ]; then
-    #      echo "available=true" >> $GITHUB_OUTPUT;
-    #    else
-    #      echo "available=false" >> $GITHUB_OUTPUT;
-    #    fi
-
-    # GitHub Packages only supports authentication using a personal access token (classic)
-    # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry#authenticating-to-github-packages
     - name: Upload Github package
-      #if: ${{ steps.secret-check.outputs.available == 'true' }}
       shell: pwsh
       env:
         GPR_SECRET: ${{secrets.GITHUB_TOKEN}}

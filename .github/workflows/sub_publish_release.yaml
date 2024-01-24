@@ -1,0 +1,52 @@
+name: Sub Publish Release
+
+on:
+  workflow_call:
+
+jobs:
+  publish:
+    name: Publish Release to PSGallery
+    runs-on: ubuntu-latest
+    environment:
+      name: psgallery
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Update version
+      id: version
+      shell: pwsh
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 5.*
+        $ver = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
+        $versionParams = @{
+          Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
+          ModuleVersion = $ver.MajorMinorPatch
+        }
+        if(("{0}" -f $ver.NuGetPreReleaseTagV2) -ne "") {
+          $versionParams.Prerelease = $ver.NuGetPreReleaseTagV2
+          echo "is_prerelease=true" >> ${env:GITHUB_OUTPUT}
+        } else {
+          echo "is_prerelease=false" >> ${env:GITHUB_OUTPUT}
+        }
+        echo ("version={0}" -f $ver.NuGetVersionV2) >> ${env:GITHUB_OUTPUT}
+
+        Update-ModuleManifest @versionParams
+
+    - name: Publish
+      shell: pwsh
+      env:
+        NUGET_KEY: ${{ secrets.PSGALLERY_SECRET }}
+      run: |
+        Publish-Module -path ./src/SitecoreCecSearchModule/1.0.0 -NuGetApiKey $env:NUGET_KEY -Verbose -ProjectUri -IconUri -AllowPrerelease
+
+    - name: Create github release tag
+      if: success() && github.ref == 'refs/heads/main'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: Release v${{ steps.version.outputs.version }}
+        draft: true
+        prerelease: ${{ steps.version.outputs.is_prerelease != 'false' }}

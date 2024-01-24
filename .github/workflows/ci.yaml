@@ -26,3 +26,12 @@ jobs:
       - verify
     uses: ./.github/workflows/sub_publish_prerelease.yaml
     secrets: inherit
+
+  publish_release:
+    name: Release
+    needs:
+      - publish_prerelease
+    uses: ./.github/workflows/sub_publish_release.yaml
+    secrets: inherit
+
+  

@@ -29,15 +29,16 @@ jobs:
         $no = $versions.CommitsSinceVersionSourcePadded
         $version = $versions.MajorMinorPatch
         $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
+        $branch = "${{github.ref_name }}"
 
         If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
           $pr = $Matches[1]
           $prerelease = "alpha${pr}pr${no}"
           $fullversion = "${version}${prerelease}"
-        } ElseIf("${{github.ref_name }}" -ne "main") {
+        } ElseIf("$branch" -ne "main") {
           $prerelease = "beta${branch}${no}"
           $fullversion = "${version}-${prerelease}"
-        } ElseIf ("${{github.ref_name }}" -eq "main" -and "${prerelease}" -eq "") {
+        } ElseIf ("$branch" -eq "main" -and "${prerelease}" -eq "") {
           $prerelease = "rc${no}"
           $fullversion = "${version}-${prerelease}"
         } ElseIf("${prerelease}" -eq "") {
@@ -56,7 +57,7 @@ jobs:
           $versionParams.Prerelease = $prerelease
         }
 
-        Write-Host ("Update version to {0}" -f $version)
+        Write-Host ("Update version to {0}" -f $fullversion)
         Update-ModuleManifest @versionParams
 
     - name: Create NuGet package

@@ -1,0 +1,47 @@
+name: CD
+
+on:
+  push:
+    tags: 
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+
+permissions:
+   # This is required to create releases
+  contents: write
+  # Allow create new deployments
+  deployments: write
+
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/sub_version.yaml
+
+  verify:
+    name: Verify
+    uses: ./.github/workflows/sub_verify.yaml
+
+  publish_release:
+    name: Release
+    needs:
+      - build
+      - verify
+    uses: ./.github/workflows/sub_publish_release.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      version_primary: ${{ needs.build.outputs.version_primary }}
+      version_prerelease: ${{ needs.build.outputs.version_prerelease }}
+      environment_name: psgallery_release
+    secrets: inherit
+  
+  github_release:
+    name: GitHub Release
+    needs:
+      - build
+      - publish_release
+    uses: ./.github/workflows/sub_github_release.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      version_prerelease: ${{ needs.build.outputs.version_prerelease }}
+    secrets: inherit

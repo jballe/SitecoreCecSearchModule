@@ -19,7 +19,7 @@ jobs:
       shell: pwsh
       run: |
         dotnet tool install --global GitVersion.Tool --version 5.*
-        dotnet-gitversion /config .\bld\GitVersion.yml /output json /url https://github.com/${{ github.repository }} /b ${{github.ref}} /c ${{github.sha}} /u ${{ github.actor }} /p ${{github.token}} | Out-String 
+        dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String 
 
     - name: Calculate version
       shell: pwsh
@@ -58,7 +58,7 @@ jobs:
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
           ModuleVersion = $parts[0]
         }
-        if(($version.Contains("-")) {
+        if($version.Contains("-")) {
           $versionParams.Prerelease = $parts[1]
         }
 

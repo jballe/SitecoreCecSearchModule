@@ -25,6 +25,8 @@ jobs:
       id: version
       run: |
         $versions = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
+        Write-Host "GitVersion output"
+        $versions
 
         $no = $versions.CommitsSinceVersionSourcePadded
         $version = $versions.MajorMinorPatch

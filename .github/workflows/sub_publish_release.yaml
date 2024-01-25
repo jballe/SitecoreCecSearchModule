@@ -92,9 +92,9 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - publish
+      - verify
     steps:
     - name: Create github release tag
-      if: success() && github.ref == 'refs/heads/main'
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}

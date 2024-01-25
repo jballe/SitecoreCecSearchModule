@@ -16,8 +16,6 @@ jobs:
   build:
     name: Create version
     runs-on: ubuntu-latest
-    environment:
-      name: gpr
     outputs:
       version: ${{ steps.version.outputs.full_version }}
       version_primary: ${{ steps.version.outputs.version }}

@@ -51,9 +51,10 @@ jobs:
 
   github_release:
     name: GitHub Relese
+    if: github.ref == 'refs/heads/main'
     needs:
       - build
-      - publish_prerelease
+      - publish_release
     uses: ./.github/workflows/sub_github_release.yaml
     with:
       version: ${{ needs.build.outputs.version }}

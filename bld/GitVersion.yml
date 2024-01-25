@@ -1,1 +1,5 @@
 mode: ContinuousDelivery
+branches:
+  main:
+    regex: main
+    tag: rc

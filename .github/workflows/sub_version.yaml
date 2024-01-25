@@ -32,7 +32,7 @@ jobs:
       run: |
         dotnet tool install --global GitVersion.Tool --version 5.*
 
-    - name: Update version
+    - name: Calculate version
       shell: pwsh
       id: version
       run: |
@@ -48,9 +48,9 @@ jobs:
         If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
           $pr = $Matches[1]
           $prerelease = "alpha${pr}pr${no}"
-        } ElseIf("$branch" -ne "main") {
+        } ElseIf("${{ github.ref }}" -ne "refs/heads/main") {
           $prerelease = "beta${branch}${no}"
-        } ElseIf ("$branch" -eq "main" -and "${prerelease}" -eq "") {
+        } ElseIf ("${{ github.ref }}" -eq "refs/heads/main" -and "${{ github.ref_type}}" -ne "tag") {
           $prerelease = "rc${no}"
         }
 
@@ -67,6 +67,20 @@ jobs:
         if("${prerelease}" -ne "") {
           $versionParams.Prerelease = $prerelease
         }
+
+    - name: Update version
+      shell: pwsh
+      run: |
+        $versionParams = @{
+          Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
+          ModuleVersion = "${{ steps.version.outputs.version }}"
+        }
+        if("${{ steps.version.outputs.vprerelease }}" -ne "") {
+          $versionParams.Prerelease = "${{ steps.version.outputs.prerelease }}"
+        }
+
+        Write-Host ("Update version to ${{ steps.version.outputs.full_version }}")
+        Update-ModuleManifest @versionParams
 
     - name: Create NuGet package
       shell: pwsh

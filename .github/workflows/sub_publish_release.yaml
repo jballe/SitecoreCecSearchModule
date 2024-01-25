@@ -10,27 +10,54 @@ jobs:
     environment:
       name: psgallery
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Update version
-      id: version
+        fetch-tags: true
+
+    - name: GitVersion install
       shell: pwsh
       run: |
         dotnet tool install --global GitVersion.Tool --version 5.*
-        $ver = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
+
+    - name: Update version
+      shell: pwsh
+      id: version
+      run: |
+        $versions = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
+        Write-Host "GitVersion output"
+        $versions
+
+        $no = $versions.CommitsSinceVersionSourcePadded
+        $version = $versions.MajorMinorPatch
+        $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
+        $branch = $versions.PreReleaseLabel
+
+        If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
+          $pr = $Matches[1]
+          $prerelease = "alpha${pr}pr${no}"
+        } ElseIf("$branch" -ne "main") {
+          $prerelease = "beta${branch}${no}"
+        } ElseIf ("$branch" -eq "main" -and "${prerelease}" -eq "") {
+          $prerelease = "rc${no}"
+        }
+
+        $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"
+
+        echo ("version={0}" -f $version) >> "$env:GITHUB_OUTPUT"
+        echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"
+        echo ("full_version={0}" -f $fullversion) >> "$env:GITHUB_OUTPUT"
+        echo ("is_prerelease={0}" -f ("${prerelease}" -ne "")) >> "$env:GITHUB_OUTPUT"
+
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
-          ModuleVersion = $ver.MajorMinorPatch
+          ModuleVersion = $version
         }
-        if(("{0}" -f $ver.NuGetPreReleaseTagV2) -ne "") {
-          $versionParams.Prerelease = $ver.NuGetPreReleaseTagV2
-          echo "is_prerelease=true" >> ${env:GITHUB_OUTPUT}
-        } else {
-          echo "is_prerelease=false" >> ${env:GITHUB_OUTPUT}
+        if("${prerelease}" -ne "") {
+          $versionParams.Prerelease = $prerelease
         }
-        echo ("version={0}" -f $ver.NuGetVersionV2) >> ${env:GITHUB_OUTPUT}
 
+        Write-Host ("Update version to {0}" -f $fullversion)
         Update-ModuleManifest @versionParams
 
     - name: Publish
@@ -38,7 +65,7 @@ jobs:
       env:
         NUGET_KEY: ${{ secrets.PSGALLERY_SECRET }}
       run: |
-        Publish-Module -path ./src/SitecoreCecSearchModule/1.0.0 -NuGetApiKey $env:NUGET_KEY -Verbose -ProjectUri -IconUri -AllowPrerelease
+        Publish-Module -path ./src/SitecoreCecSearchModule -NuGetApiKey $env:NUGET_KEY -Verbose -AllowPrerelease
 
     - name: Create github release tag
       if: success() && github.ref == 'refs/heads/main'
@@ -46,7 +73,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ steps.version.outputs.version }}
-        release_name: Release v${{ steps.version.outputs.version }}
+        tag_name: v${{ steps.version.outputs.full_version }}
+        release_name: Release v${{ steps.version.outputs.full_version }}
         draft: true
         prerelease: ${{ steps.version.outputs.is_prerelease != 'false' }}

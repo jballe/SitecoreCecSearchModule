@@ -19,7 +19,9 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
+        name: package
         merge-multiple: true
+        path: publish
 
     - name: Create github release tag
       uses: ncipollo/release-action@v1
@@ -29,5 +31,5 @@ jobs:
         name: Release v${{ inputs.version }}
         draft: true
         prerelease: ${{ inputs.version_prerelease != '' }}
-        artifacts: '*.nupkg'
+        artifacts: 'publish/*.nupkg'
   

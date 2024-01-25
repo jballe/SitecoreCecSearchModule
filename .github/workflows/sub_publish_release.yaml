@@ -65,7 +65,7 @@ jobs:
       env:
         NUGETKEY: ${{ secrets.NUGET_APIKEY }}
       run: |
-        Publish-Module -path ./src/SitecoreCecSearchModule -NuGetApiKey "${env:NUGETKEY}" -Verbose -AllowPrerelease
+        Publish-PSResource -path ./src/SitecoreCecSearchModule -Repository PSGallery -APIKey "${env:NUGETKEY}" -Verbose
 
     - name: Create github release tag
       if: success() && github.ref == 'refs/heads/main'

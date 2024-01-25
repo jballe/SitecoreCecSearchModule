@@ -48,7 +48,7 @@ jobs:
         If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
           $pr = $Matches[1]
           $prerelease = "alpha${pr}pr${no}"
-        } ElseIf("${{ github.ref }}" -ne "refs/heads/main") {
+        } ElseIf("${{ github.ref }}" -ne "refs/heads/main" -and "${{ github.ref }}" -notlike "tags/v*") {
           $prerelease = "beta${branch}${no}"
         } ElseIf ("${{ github.ref }}" -eq "refs/heads/main" -and "${{ github.ref_type}}" -ne "tag") {
           $prerelease = "rc${no}"

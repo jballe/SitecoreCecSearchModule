@@ -47,13 +47,43 @@ jobs:
         name: package
         path: publish/*.nupkg
 
-    - name: Upload Github package
+    - name: Publish Github Registry
       shell: pwsh
-      env:
-        GPR_SECRET: ${{secrets.GITHUB_TOKEN}}
+      #env:
+      #  GPR_SECRET: ${{secrets.GITHUB_TOKEN}}
       run: |
-        dotnet tool install --global gpr --version 0.1.294
-        gpr push -k "$env:GPR_SECRET" (Join-Path $PWD "publish" "*.nupkg" -Resolve) -r https://github.com/${{github.repository}}
+        $user = "${{ github.actor }}"
+        $token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText -Force
+        $creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($user, $token)
+        $feed = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+        $moduleName = "SitecoreCecSearchModule"
+        $repositoryName = "PowershellNugetServices"
+
+        ## Force TLS1.2
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        
+        ## Register repository
+        $registerArgs = @{
+            Name = $repositoryName
+            SourceLocation = $feed
+            PublishLocation = $feed
+            InstallationPolicy = 'Trusted'
+            Credential = $creds
+        }
+        
+        Register-PSRepository @registerArgs
+        
+        Publish-Module -Path ./src/SitecoreCecSearchModule `
+          -Repository $repositoryName `
+          -NuGetApiKey "${{ github.token }}"  
+
+    #- name: Upload Github package
+    #  shell: pwsh
+    #  env:
+    #    GPR_SECRET: ${{secrets.GITHUB_TOKEN}}
+    #  run: |
+    #    dotnet tool install --global gpr --version 0.1.294
+    #    gpr push -k "$env:GPR_SECRET" (Join-Path $PWD "publish" "*.nupkg" -Resolve) -r https://github.com/${{github.repository}}
 
     #- name: Publish
     #  shell: pwsh

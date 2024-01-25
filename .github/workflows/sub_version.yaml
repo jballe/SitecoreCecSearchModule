@@ -2,10 +2,15 @@ name: Sub Publish Prerelease
 
 on:
   workflow_call:
+    outputs:
+      version: ${{ jobs.publish.outputs.version }}
+      version_primary: ${{ jobs.publish.outputs.version_primary }}
+      version_prerelease: ${{ jobs.publish.outputs.version_prerelease }}
+      is_prerelease: ${{ jobs.publish.outputs.is_prerelease }}
 
 jobs:
-  publish:
-    name: Publish prerelease to GitHub Package Repository
+  build:
+    name: Create version
     runs-on: ubuntu-latest
     environment:
       name: gpr

@@ -63,9 +63,9 @@ jobs:
     - name: Publish
       shell: pwsh
       env:
-        NUGET_KEY: ${{ secrets.PSGALLERY_SECRET }}
+        NUGETKEY: ${{ secrets.NUGET_APIKEY }}
       run: |
-        Publish-Module -path ./src/SitecoreCecSearchModule -NuGetApiKey $env:NUGET_KEY -Verbose -AllowPrerelease
+        Publish-Module -path ./src/SitecoreCecSearchModule -NuGetApiKey "${env:NUGETKEY}" -Verbose -AllowPrerelease
 
     - name: Create github release tag
       if: success() && github.ref == 'refs/heads/main'

@@ -42,7 +42,7 @@ jobs:
           $prerelease = "rc${no}"
         }
 
-        $fullversion = @($version, $prerelease) | Where-object { $_ -ne "" } -join "-"
+        $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"
 
         echo ("version={0}" -f $version) >> "$env:GITHUB_OUTPUT"
         echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"

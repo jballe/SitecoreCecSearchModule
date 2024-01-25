@@ -15,55 +15,49 @@ jobs:
         fetch-tags: true
         fetch-depth: 0
 
-    - name: GitVersion output
+    - name: GitVersion install
       shell: pwsh
       run: |
         dotnet tool install --global GitVersion.Tool --version 5.*
-        dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String 
-
-    - name: Calculate version
-      shell: pwsh
-      id: version
-      run: |
-        $baseVersion = "0.0.2"
-        $tag = (git tag --points-at ae4209d4c672b49c36aa0578b945f40aa2356d65 | Out-String)
-        $branch = "${{github.ref_name }}".Replace("feature/", "").Replace("/", "-").ToLower()
-        $no = "${{github.run_number }}"
-        $version = ""
-
-        Write-Host "Tag:    $tag"
-        Write-Host "Branch: $branch"
-        Write-Host "No:     $no"
-
-        If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
-          $pr = $Matches[1]
-          $version = "${baseVersion}-alpha-pr${pr}"-${no}
-        } ElseIf ("${tag}" -ne "" -and $tag -match "v[0-9\.]+[0-9]" -and $tag.Length -gt 1) {
-          $version = $tag.Substring(1)
-        } ElseIf ($branch -eq "main") {
-          $version = "${baseVersion}-rc-${no}"
-        } Else {
-          $version = "${baseVersion}-beta-${branch}-${no}"
-        }
-
-        echo ("version={0}" -f $tag.Substring(1)) >> "$env:GITHUB_OUTPUT"
 
     - name: Update version
       shell: pwsh
+      id: version
       run: |
+        $versions = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
 
-        $version = "${{ steps.version.outputs.version}}"
-        $parts = $version.Split("-", 2)
+        $no = $versions.CommitsSinceVersionSourcePadded
+        $version = $versions.MajorMinorPatch
+        $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
+
+        If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
+          $pr = $Matches[1]
+          $prerelease = "alpha-pr${pr}-${no}"
+          $fullversion = "${version}-${prerelease}"
+        } ElseIf("${{github.ref_name }}" -ne "main") {
+          $prerelease = "beta-${branch}-${no}"
+          $fullversion = "${version}-${prerelease}"
+        } ElseIf ("${{github.ref_name }}" -eq "main" -and "${prerelease}" -eq "") {
+          $prerelease = "rc-${no}"
+          $fullversion = "${version}-${prerelease}"
+        } ElseIf("${prerelease}" -eq "") {
+          $fullversion = "${version}"
+        }
+
+        echo ("version={0}" -f $version) >> "$env:GITHUB_OUTPUT"
+        echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"
+        echo ("full_version={0}" -f $fullversion) >> "$env:GITHUB_OUTPUT"
+
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
-          ModuleVersion = $parts[0]
+          ModuleVersion = $version
         }
-        if($version.Contains("-")) {
-          $versionParams.Prerelease = $parts[1]
+        if("${prerelease}" -ne "") {
+          $versionParams.Prerelease = $prerelease
         }
 
-        Write-Host ("Update version to" -f $version)
-        Update-ModuleManifest @versionParams -Verbose
+        Write-Host ("Update version to {0}" -f $version)
+        Update-ModuleManifest @versionParams
 
     - name: Create NuGet package
       shell: pwsh

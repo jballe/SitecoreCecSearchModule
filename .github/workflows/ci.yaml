@@ -29,6 +29,7 @@ jobs:
 
   publish_release:
     name: Release
+    if: github.ref == 'refs/heads/main'
     needs:
       - publish_prerelease
     uses: ./.github/workflows/sub_publish_release.yaml

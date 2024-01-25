@@ -18,6 +18,8 @@ jobs:
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
+      with:
+        merge-multiple: true
 
     - name: Create github release tag
       uses: ncipollo/release-action@v1

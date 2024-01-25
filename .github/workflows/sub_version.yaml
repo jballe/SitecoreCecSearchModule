@@ -60,14 +60,6 @@ jobs:
         echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"
         echo ("full_version={0}" -f $fullversion) >> "$env:GITHUB_OUTPUT"
 
-        $versionParams = @{
-          Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
-          ModuleVersion = $version
-        }
-        if("${prerelease}" -ne "") {
-          $versionParams.Prerelease = $prerelease
-        }
-
     - name: Update version
       shell: pwsh
       run: |

@@ -3,10 +3,14 @@ name: Sub Publish Prerelease
 on:
   workflow_call:
     outputs:
-      version: ${{ jobs.publish.outputs.version }}
-      version_primary: ${{ jobs.publish.outputs.version_primary }}
-      version_prerelease: ${{ jobs.publish.outputs.version_prerelease }}
-      is_prerelease: ${{ jobs.publish.outputs.is_prerelease }}
+      version:
+        value: ${{ jobs.build.outputs.version }}
+      version_primary: 
+        value: ${{ jobs.build.outputs.version_primary }}
+      version_prerelease:
+        value: ${{ jobs.build.outputs.version_prerelease }}
+      is_prerelease:
+        value: ${{ jobs.build.outputs.is_prerelease }}
 
 jobs:
   build:

@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
 permissions:
-   # This is required for actions/checkout
-  contents: read
+   # This is required to create releases
+  contents: write
   # Allow cancel job
   actions: write
   # Allow create new deployments
@@ -38,7 +38,7 @@ jobs:
 
   publish_release:
     name: Release
-    #if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     needs:
       - build
       - publish_prerelease
@@ -49,4 +49,15 @@ jobs:
       version_prerelease: ${{ needs.build.outputs.version_prerelease }}
     secrets: inherit
 
+  github_release:
+    name: GitHub Relese
+    needs:
+      - build
+      - publish_prerelease
+    uses: ./.github/workflows/sub_github_release.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      version_prerelease: ${{ needs.build.outputs.version_prerelease }}
+    secrets: inherit
+  
   

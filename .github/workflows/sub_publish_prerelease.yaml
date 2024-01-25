@@ -32,13 +32,13 @@ jobs:
 
         If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
           $pr = $Matches[1]
-          $prerelease = "alpha-pr${pr}-${no}"
-          $fullversion = "${version}-${prerelease}"
+          $prerelease = "alpha${pr}pr${no}"
+          $fullversion = "${version}${prerelease}"
         } ElseIf("${{github.ref_name }}" -ne "main") {
-          $prerelease = "beta-${branch}-${no}"
+          $prerelease = "beta${branch}${no}"
           $fullversion = "${version}-${prerelease}"
         } ElseIf ("${{github.ref_name }}" -eq "main" -and "${prerelease}" -eq "") {
-          $prerelease = "rc-${no}"
+          $prerelease = "rc${no}"
           $fullversion = "${version}-${prerelease}"
         } ElseIf("${prerelease}" -eq "") {
           $fullversion = "${version}"

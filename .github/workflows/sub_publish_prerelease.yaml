@@ -31,21 +31,18 @@ jobs:
         $no = $versions.CommitsSinceVersionSourcePadded
         $version = $versions.MajorMinorPatch
         $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
-        $branch = "${{github.ref_name }}"
+        $branch = $versions.PreReleaseLabel
 
         If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
           $pr = $Matches[1]
           $prerelease = "alpha${pr}pr${no}"
-          $fullversion = "${version}${prerelease}"
         } ElseIf("$branch" -ne "main") {
           $prerelease = "beta${branch}${no}"
-          $fullversion = "${version}-${prerelease}"
         } ElseIf ("$branch" -eq "main" -and "${prerelease}" -eq "") {
           $prerelease = "rc${no}"
-          $fullversion = "${version}-${prerelease}"
-        } ElseIf("${prerelease}" -eq "") {
-          $fullversion = "${version}"
         }
+
+        $fullversion = @($version, $prerelease) | Where-object { $_ -ne "" } -join "-"
 
         echo ("version={0}" -f $version) >> "$env:GITHUB_OUTPUT"
         echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"

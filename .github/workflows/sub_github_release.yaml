@@ -27,5 +27,5 @@ jobs:
         name: Release v${{ inputs.version }}
         draft: true
         prerelease: ${{ inputs.version_prerelease != '' }}
-        artifacts: *.nupkg
+        artifacts: '*.nupkg'
   

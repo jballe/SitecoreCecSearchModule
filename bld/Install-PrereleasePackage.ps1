@@ -34,6 +34,8 @@ If (-not (Test-Path $LocalRegistryPath -PathType Container)) {
     New-Item $LocalRegistryPath -ItemType Directory | Out-Null
 }
 
+Install-Module Microsoft.PowerShell.PSResourceGet -Repository PSGallery -Force
+
 ## Register the local repository
 Write-Host "Register Local PSRepository" -ForegroundColor Green
 if ($Null -ne (get-psrepository -Name PrivateNugetSource -ErrorAction SilentlyContinue)) {

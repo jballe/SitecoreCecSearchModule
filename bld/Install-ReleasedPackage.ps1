@@ -4,7 +4,9 @@ param(
 )
 $ErrorActionPreference = "STOP"
 
-unregister-PSResourceRepository -Name PSGallery -ErrorAction SilentlyContinue | Out-Null
+Install-Module Microsoft.PowerShell.PSResourceGet -Repository PSGallery -Force
+
+UnRegister-PSResourceRepository -Name PSGallery -ErrorAction SilentlyContinue | Out-Null
 Register-PSResourceRepository -psgallery -Trusted
 
 Install-Module -Name $PackageName -Repository PSGallery -AllowPrerelease -AcceptLicense -Force -MinimumVersion $Version -SkipPublisherCheck

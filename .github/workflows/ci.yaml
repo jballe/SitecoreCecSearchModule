@@ -24,7 +24,7 @@ jobs:
     name: Verify
     uses: ./.github/workflows/sub_verify.yaml
 
-  publish_prerelease:
+  publish_beta:
     name: Prerelease
     needs:
       - build
@@ -36,22 +36,49 @@ jobs:
       version_prerelease: ${{ needs.build.outputs.version_prerelease }}
     secrets: inherit
 
-  publish_release:
-    name: Release
+  publish_rc:
+    name: Release candidate
     if: github.ref == 'refs/heads/main'
     needs:
       - build
-      - publish_prerelease
+      - publish_beta
     uses: ./.github/workflows/sub_publish_release.yaml
     with:
       version: ${{ needs.build.outputs.version }}
       version_primary: ${{ needs.build.outputs.version_primary }}
       version_prerelease: ${{ needs.build.outputs.version_prerelease }}
+      environment_name: psgallery
     secrets: inherit
 
-  github_release:
-    name: GitHub Relese
+  publish_release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - build
+      - publish_beta
+    uses: ./.github/workflows/sub_publish_release.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      version_primary: ${{ needs.build.outputs.version_primary }}
+      version_prerelease: ${{ needs.build.outputs.version_prerelease }}
+      environment_name: psgallery_release
+    secrets: inherit
+
+  github_release_rc:
+    name: GitHub Release
     if: github.ref == 'refs/heads/main'
+    needs:
+      - build
+      - publish_rc
+    uses: ./.github/workflows/sub_github_release.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      version_prerelease: ${{ needs.build.outputs.version_prerelease }}
+    secrets: inherit
+  
+  github_release:
+    name: GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
     needs:
       - build
       - publish_release

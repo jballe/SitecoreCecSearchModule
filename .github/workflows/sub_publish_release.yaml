@@ -13,13 +13,17 @@ on:
         required: false
         type: string
         default: ''
-
+      environment_name:
+        required: true
+        type: string
+        default: ''
+  
 jobs:
   publish:
     name: Publish Release to PSGallery
     runs-on: ubuntu-latest
     environment:
-      name: psgallery
+      name: ${{ inputs.environment_name }}
     steps:
     - uses: actions/checkout@v4
       with:

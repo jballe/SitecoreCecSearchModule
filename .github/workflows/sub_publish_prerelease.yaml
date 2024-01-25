@@ -1,0 +1,85 @@
+name: Sub Publish Prerelease
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      version_primary:
+        required: true
+        type: string
+      version_prerelease:
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  publish:
+    name: Publish prerelease to GitHub Package Repository
+    runs-on: ubuntu-latest
+    environment:
+      name: gpr
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-tags: false
+        fetch-depth: 1
+
+    - name: Update version
+      shell: pwsh
+      run: |
+        $versionParams = @{
+          Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
+          ModuleVersion = "${{ inputs.version_primary }}"
+        }
+        if("${{ inputs.version_prerelease }}" -ne "") {
+          $versionParams.Prerelease = "${{ inputs.version_prerelease }}"
+        }
+
+        Write-Host ("Update version to {0}" -f $fullversion)
+        Update-ModuleManifest @versionParams
+        
+    - name: Publish Github Registry
+      shell: pwsh
+      run: |
+        $user = "${{ github.actor }}"
+        $token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText -Force
+        $creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($user, $token)
+        $feed = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+        $moduleName = "SitecoreCecSearchModule"
+        $repositoryName = "PowershellNugetServices"
+
+        ## Force TLS1.2
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        
+        ## Register repository
+        $registerArgs = @{
+            Name = $repositoryName
+            SourceLocation = $feed
+            PublishLocation = $feed
+            InstallationPolicy = 'Trusted'
+            Credential = $creds
+        }
+        
+        Register-PSRepository @registerArgs
+        
+        Publish-Module -Path ./src/SitecoreCecSearchModule `
+          -Repository $repositoryName `
+          -NuGetApiKey "${{ github.token }}"
+
+  verify:
+    name: Verify published package
+    runs-on: ubuntu-latest
+    needs:
+      - publish
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: false
+          fetch-depth: 1
+      - name: Install package
+        shell: pwsh
+        run: |
+          ./bld/Install-PrereleasePackage.ps1 -User "${{ github.actor }}" -PersonalAccessToken "${{ github.token }}" -Version ${{ inputs.version }}

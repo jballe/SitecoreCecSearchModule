@@ -1,0 +1,35 @@
+name: Sub Publish Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      version_prerelease:
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: package
+        merge-multiple: true
+        path: publish
+
+    - name: Create github release tag
+      uses: ncipollo/release-action@v1
+      with:
+        commit: ${{ github.sha }}
+        tag: v${{ inputs.version }}
+        name: Release v${{ inputs.version }}
+        draft: true
+        prerelease: ${{ inputs.version_prerelease != '' }}
+        artifacts: 'publish/*.nupkg'
+  

@@ -5,13 +5,13 @@ on:
 
 jobs:
   verify:
-    name: Verify module
+    name: Script Analyzer
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup PowerShell module cache
         id: cacher
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "~/.local/share/powershell/Modules"
           key: ${{ runner.os }}-PSScriptAnalyzer
@@ -21,7 +21,7 @@ jobs:
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module PSScriptAnalyzer -Force
-          Install-Module -Name Pester -Force -SkipPublisherCheck
+          Install-Module -Name Pester -Force -SkipPublisherCheck 
       - name: Run ScriptAnalyzer
         shell: pwsh
-        run: Invoke-ScriptAnalyzer -Path src/SitecoreCecSearchModule/1.0.0 -IncludeDefaultRules -Recurse
+        run: Invoke-ScriptAnalyzer -Path src/SitecoreCecSearchModule -IncludeDefaultRules -Recurse -EnableExit -ReportSummary -ExcludeRule PSAvoidTrailingWhitespace

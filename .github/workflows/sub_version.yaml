@@ -1,0 +1,84 @@
+name: Sub Publish Prerelease
+
+on:
+  workflow_call:
+    outputs:
+      version:
+        value: ${{ jobs.build.outputs.version }}
+      version_primary: 
+        value: ${{ jobs.build.outputs.version_primary }}
+      version_prerelease:
+        value: ${{ jobs.build.outputs.version_prerelease }}
+      is_prerelease:
+        value: ${{ jobs.build.outputs.is_prerelease }}
+
+jobs:
+  build:
+    name: Create version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.full_version }}
+      version_primary: ${{ steps.version.outputs.version }}
+      version_prerelease: ${{ steps.version.outputs.prerelease }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-tags: true
+        fetch-depth: 0
+
+    - name: GitVersion install
+      shell: pwsh
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 5.*
+
+    - name: Update version
+      shell: pwsh
+      id: version
+      run: |
+        $versions = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
+        Write-Host "GitVersion output"
+        $versions
+
+        $no = $versions.CommitsSinceVersionSourcePadded
+        $version = $versions.MajorMinorPatch
+        $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
+        $branch = $versions.PreReleaseLabel
+
+        If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
+          $pr = $Matches[1]
+          $prerelease = "alpha${pr}pr${no}"
+        } ElseIf("$branch" -ne "main") {
+          $prerelease = "beta${branch}${no}"
+        } ElseIf ("$branch" -eq "main" -and "${prerelease}" -eq "") {
+          $prerelease = "rc${no}"
+        }
+
+        $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"
+
+        echo ("version={0}" -f $version) >> "$env:GITHUB_OUTPUT"
+        echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"
+        echo ("full_version={0}" -f $fullversion) >> "$env:GITHUB_OUTPUT"
+
+        $versionParams = @{
+          Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
+          ModuleVersion = $version
+        }
+        if("${prerelease}" -ne "") {
+          $versionParams.Prerelease = $prerelease
+        }
+
+    - name: Create NuGet package
+      shell: pwsh
+      run: |
+        $repoPath = (Join-Path $PWD "publish")
+        If(-not (Test-Path $repoPath -PathType Container)) { New-Item $repoPath -ItemType Directory | Out-Null }
+
+        Install-Module Microsoft.PowerShell.PSResourceGet -Repository PSGallery -Force
+        Register-PSResourceRepository -Name nuget-local -Uri $repoPath
+        Publish-PSResource -Path ./src/SitecoreCecSearchModule -Repository "nuget-local"
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: package
+        path: publish/*.nupkg

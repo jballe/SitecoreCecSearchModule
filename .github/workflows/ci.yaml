@@ -16,6 +16,10 @@ permissions:
 
 
 jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/sub_version.yaml
+
   verify:
     name: Verify
     uses: ./.github/workflows/sub_verify.yaml
@@ -23,16 +27,26 @@ jobs:
   publish_prerelease:
     name: Prerelease
     needs:
+      - build
       - verify
     uses: ./.github/workflows/sub_publish_prerelease.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      version_primary: ${{ needs.build.outputs.version_primary }}
+      version_prerelease: ${{ needs.build.outputs.version_prerelease }}
     secrets: inherit
 
   publish_release:
     name: Release
     #if: github.ref == 'refs/heads/main'
     needs:
+      - build
       - publish_prerelease
     uses: ./.github/workflows/sub_publish_release.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      version_primary: ${{ needs.build.outputs.version_primary }}
+      version_prerelease: ${{ needs.build.outputs.version_prerelease }}
     secrets: inherit
 
   

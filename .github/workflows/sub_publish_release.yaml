@@ -2,6 +2,17 @@ name: Sub Publish Release
 
 on:
   workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      version_primary:
+        required: true
+        type: string
+      version_prerelease:
+        required: false
+        type: string
+        default: ''
 
 jobs:
   publish:
@@ -9,55 +20,21 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: psgallery
-    outputs:
-      version: ${{ steps.version.outputs.full_version }}
-      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0
-        fetch-tags: true
-
-    - name: GitVersion install
-      shell: pwsh
-      run: |
-        dotnet tool install --global GitVersion.Tool --version 5.*
+        fetch-depth: 1
+        fetch-tags: false
 
     - name: Update version
       shell: pwsh
-      id: version
       run: |
-        $versions = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
-        Write-Host "GitVersion output"
-        $versions
-
-        $no = $versions.CommitsSinceVersionSourcePadded
-        $version = $versions.MajorMinorPatch
-        $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
-        $branch = $versions.PreReleaseLabel
-
-        If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
-          $pr = $Matches[1]
-          $prerelease = "alpha${pr}pr${no}"
-        } ElseIf("$branch" -ne "main") {
-          $prerelease = "beta${branch}${no}"
-        } ElseIf ("$branch" -eq "main" -and "${prerelease}" -eq "") {
-          $prerelease = "rc${no}"
-        }
-
-        $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"
-
-        echo ("version={0}" -f $version) >> "$env:GITHUB_OUTPUT"
-        echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"
-        echo ("full_version={0}" -f $fullversion) >> "$env:GITHUB_OUTPUT"
-        echo ("is_prerelease={0}" -f ("${prerelease}" -ne "")) >> "$env:GITHUB_OUTPUT"
-
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
-          ModuleVersion = $version
+          ModuleVersion = "${{ inputs.version_primary }}"
         }
-        if("${prerelease}" -ne "") {
-          $versionParams.Prerelease = $prerelease
+        if("${{ inputs.version_prerelease }}" -ne "") {
+          $versionParams.Prerelease = "${{ inputs.version_prerelease }}"
         }
 
         Write-Host ("Update version to {0}" -f $fullversion)
@@ -85,7 +62,7 @@ jobs:
       - name: Install package
         shell: pwsh
         run: |
-          ./bld/Install-ReleasedPackage.ps1 -Version ${{ needs.publish.outputs.version }}
+          ./bld/Install-ReleasedPackage.ps1 -Version ${{ inputs.version }}
 
   release:
     name: Create release
@@ -99,7 +76,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        tag_name: v${{ needs.publish.outputs.version }}
-        release_name: Release v${{ needs.publish.outputs.version }}
+        tag_name: v${{ inputs.version }}
+        release_name: Release v${{ inputs.version }}
         draft: true
-        prerelease: ${{ needs.publish.outputs.is_prerelease != 'false' }}
+        prerelease: ${{ inputs.version_prerelease != '' }}

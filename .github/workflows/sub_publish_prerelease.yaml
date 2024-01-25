@@ -2,6 +2,17 @@ name: Sub Publish Prerelease
 
 on:
   workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      version_primary:
+        required: true
+        type: string
+      version_prerelease:
+        required: false
+        type: string
+        default: ''
 
 jobs:
   publish:
@@ -9,53 +20,21 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: gpr
-    outputs:
-      version: ${{ steps.version.outputs.full_version }}
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-tags: true
-        fetch-depth: 0
-
-    - name: GitVersion install
-      shell: pwsh
-      run: |
-        dotnet tool install --global GitVersion.Tool --version 5.*
+        fetch-tags: false
+        fetch-depth: 1
 
     - name: Update version
       shell: pwsh
-      id: version
       run: |
-        $versions = dotnet-gitversion /config .\bld\GitVersion.yml /output json | Out-String | ConvertFrom-Json
-        Write-Host "GitVersion output"
-        $versions
-
-        $no = $versions.CommitsSinceVersionSourcePadded
-        $version = $versions.MajorMinorPatch
-        $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
-        $branch = $versions.PreReleaseLabel
-
-        If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
-          $pr = $Matches[1]
-          $prerelease = "alpha${pr}pr${no}"
-        } ElseIf("$branch" -ne "main") {
-          $prerelease = "beta${branch}${no}"
-        } ElseIf ("$branch" -eq "main" -and "${prerelease}" -eq "") {
-          $prerelease = "rc${no}"
-        }
-
-        $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"
-
-        echo ("version={0}" -f $version) >> "$env:GITHUB_OUTPUT"
-        echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"
-        echo ("full_version={0}" -f $fullversion) >> "$env:GITHUB_OUTPUT"
-
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
-          ModuleVersion = $version
+          ModuleVersion = "${{ inputs.version_primary }}"
         }
-        if("${prerelease}" -ne "") {
-          $versionParams.Prerelease = $prerelease
+        if("${{ inputs.version_prerelease }}" -ne "") {
+          $versionParams.Prerelease = "${{ inputs.version_prerelease }}"
         }
 
         Write-Host ("Update version to {0}" -f $fullversion)
@@ -78,8 +57,6 @@ jobs:
 
     - name: Publish Github Registry
       shell: pwsh
-      #env:
-      #  GPR_SECRET: ${{secrets.GITHUB_TOKEN}}
       run: |
         $user = "${{ github.actor }}"
         $token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText -Force
@@ -120,4 +97,4 @@ jobs:
       - name: Install package
         shell: pwsh
         run: |
-          ./bld/Install-PrereleasePackage.ps1 -User "${{ github.actor }}" -PersonalAccessToken "${{ github.token }}" -Version ${{ needs.publish.outputs.version }}
+          ./bld/Install-PrereleasePackage.ps1 -User "${{ github.actor }}" -PersonalAccessToken "${{ github.token }}" -Version ${{ inputs.version }}

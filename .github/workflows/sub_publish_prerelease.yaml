@@ -18,9 +18,9 @@ jobs:
       shell: pwsh
       run: |
         dotnet tool install --global GitVersion.Tool --version 5.*
-        $o = dotnet-gitversion /config .\bld\GitVersion.yml /output json /url https://github.com/${{github.GITHUB_REPOSITORY}} /b ${{github.GITHUB_REF}} /c ${{github.GITHUB_SHA}} /u jballe /p ${{secrets.GITHUB_TOKEN}} | Out-String 
+        $o = dotnet-gitversion /config .\bld\GitVersion.yml /output json /url https://github.com/${{ github.repository }} /b ${{github.ref}} /c ${{github.sha}} /u ${{ github.actor }} /p ${{github.token}} | Out-String 
         $o
-        $ver = $ o | ConvertFrom-Json
+        $ver = $o | ConvertFrom-Json
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
           ModuleVersion = $ver.MajorMinorPatch

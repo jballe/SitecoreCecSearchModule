@@ -10,21 +10,35 @@ jobs:
     environment:
       name: gpr
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        fetch-tags: true
+        fetch-depth: 0
+
+    - name: GitVersion output
+      shell: pwsh
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 5.*
+        dotnet-gitversion /config .\bld\GitVersion.yml /output json /url https://github.com/${{ github.repository }} /b ${{github.ref}} /c ${{github.sha}} /u ${{ github.actor }} /p ${{github.token}} | Out-String 
 
     - name: Calculate version
       shell: pwsh
       id: version
       run: |
-        $baseVersion = "0.0.1"
+        $baseVersion = "0.0.2"
         $tag = (git tag --points-at ae4209d4c672b49c36aa0578b945f40aa2356d65 | Out-String)
         $branch = "${{github.ref_name }}".Replace("feature/", "").Replace("/", "-").ToLower()
         $no = "${{github.run_number }}"
         $version = ""
+
+        Write-Host "Tag:    $tag"
+        Write-Host "Branch: $branch"
+        Write-Host "No:     $no"
+
         If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
           $pr = $Matches[1]
           $version = "${baseVersion}-alpha-pr${pr}"-${no}
-        } ElseIf ($tag -match "v[0-9\.]+[0-9]") {
+        } ElseIf ("${tag}" -ne "" -and $tag -match "v[0-9\.]+[0-9]" -and $tag.Length -gt 1) {
           $version = $tag.Substring(1)
         } ElseIf ($branch -eq "main") {
           $version = "${baseVersion}-rc-${no}"

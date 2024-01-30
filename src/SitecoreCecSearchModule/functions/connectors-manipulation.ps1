@@ -87,6 +87,33 @@ function Remove-CecConnectorPrefix {
     }
 }
 
+function Update-CecConnectorCrawlerSchedule {
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]$Connector,
+        [ValidateSet('hour', 'day', 'week')]
+        $Frequency = "day",
+        $Interval = 2
+    )
+
+    process {
+        if(-not $Connector.PSObject.Properties.Name.Contains("content")) {
+            return $Connector
+        }
+
+        if(-not $Connector.content.PSObject.Properties.Name.Contains("crawler")) {
+            return $Connector
+        }
+
+        if(-not $Connector.content.crawler.PSObject.Properties.Name.Contains("recurrence")) {
+            return $Connector
+        }
+
+        $Connector.content.crawler.recurrence.frequency = $Frequency
+        $Connector.content.crawler.recurrence.interval = $Interval
+        return $Connector
+    }
+}
+
 function Invoke-CecConnectorReplacement {
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector,

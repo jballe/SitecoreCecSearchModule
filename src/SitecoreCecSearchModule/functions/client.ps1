@@ -1,4 +1,4 @@
-﻿function Invoke-CecLogin {
+function Invoke-CecLogin {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password', Justification = 'Obsolete')]
     param(
         [String] $Email,
@@ -102,7 +102,8 @@ function Invoke-CecDomainMethod {
         [string]$DomainScope = "portal",
         [string]$Version = "v1",
         [string]$BaseUrl = "https://discover.sitecorecloud.io",
-        [string]$FullPath = $Null
+        [string]$FullPath = $Null,
+        [switch]$SkipHttpErrorCheck
     )
 
     $token = (Get-Variable -Name "CecAccessToken").Value
@@ -132,7 +133,7 @@ function Invoke-CecDomainMethod {
     }
 
     try {
-        $response = Invoke-RestMethod @params -ErrorAction SilentlyContinue
+        $response = Invoke-RestMethod @params -ErrorAction SilentlyContinue -SkipHttpErrorCheck:$SkipHttpErrorCheck
         return $response
     }
     catch {

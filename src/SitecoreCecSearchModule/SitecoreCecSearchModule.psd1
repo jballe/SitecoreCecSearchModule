@@ -91,6 +91,7 @@
     'Get-CecConnectorJobStatus', 
 
     'Get-CecJobStatus', 
+    'Get-CecJobErrors',
 
     'Get-CecAttribute', 
     'Set-CecAttribute', 

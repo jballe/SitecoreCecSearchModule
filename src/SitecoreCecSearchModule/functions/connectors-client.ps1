@@ -162,9 +162,9 @@ function Publish-CecConnector {
 function Start-CecConnectorRescan {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
-        [Parameter(ValueFromPipeline)]$Connector,
-        $ConnectorId,
-        $ConnectorType
+        [Parameter(ValueFromPipeline)]
+        $Connector,
+        [Switch]$Force
     )
 
     process {
@@ -194,30 +194,4 @@ function Start-CecConnectorRescan {
             Write-Information ("Would have called PUT on ${urlPath} with body:`n{0}" -f ($body | ConvertTo-Json -Depth 30))
         }
     }
-}
-
-function Get-CecConnectorJobStatus {
-    param(
-        $ConnectorId,
-        $Limit = 1,
-        $Sort = "-createdAt"
-    )
-
-    Get-CecJobStatus -Filter @{ connectorId = $ConnectorId } -Limit $Limit -Sort $Sort
-}
-
-function Get-CecJobStatus {
-    param(
-        $Filter,
-        $Limit = 1,
-        $Sort = "-createdAt"
-    )
-
-    $url = "/microservices/job-orchestrator/jobs?limit=${Limit}&sort=${Sort}"
-
-    if ($Null -ne $Filter) {
-        $url += "&filter=" + [System.Web.HttpUtility]::UrlEncode( $($Filter | ConvertTo-Json -Compress) )
-    }
-
-    Invoke-CecDomainMethod -Path $url | Select-Object -ExpandProperty jobs
 }

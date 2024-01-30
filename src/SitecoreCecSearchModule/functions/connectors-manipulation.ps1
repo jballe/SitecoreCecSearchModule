@@ -37,7 +37,7 @@ function Add-CecConnectorPrefix {
 }
 
 function Remove-CecConnectorPrefix {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector,
         [String]$Suffix = "",
@@ -88,29 +88,35 @@ function Remove-CecConnectorPrefix {
 }
 
 function Set-CecConnectorCrawlerSchedule {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector,
-        [ValidateSet('hour', 'day', 'week')]
-        $Frequency = "day",
-        $Interval = 2
+        [ValidateSet('hour', 'day', 'week', $null)]
+        $Frequency = $null,
+        $Interval = $null
     )
 
     process {
-        if(-not $Connector.PSObject.Properties.Name.Contains("content")) {
+        if (-not $Connector.PSObject.Properties.Name.Contains("content")) {
             return $Connector
         }
 
-        if(-not $Connector.content.PSObject.Properties.Name.Contains("crawler")) {
+        if (-not $Connector.content.PSObject.Properties.Name.Contains("crawler")) {
             return $Connector
         }
 
-        if(-not $Connector.content.crawler.PSObject.Properties.Name.Contains("recurrence")) {
+        if (-not $Connector.content.crawler.PSObject.Properties.Name.Contains("recurrence")) {
             return $Connector
         }
 
-        $Connector.content.crawler.recurrence.frequency = $Frequency
-        $Connector.content.crawler.recurrence.interval = $Interval
+        if ($Null -ne $Frequency) {
+            $Connector.content.crawler.recurrence.frequency = $Frequency
+        }
+
+        if ($Null -ne $Interval) {
+            $Connector.content.crawler.recurrence.interval = $Interval
+        }
+        
         return $Connector
     }
 }
@@ -213,7 +219,7 @@ function Invoke-CecConnectorReplacement {
 }
 
 function Update-CecConnectorModelWithId {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector,
 
@@ -252,7 +258,7 @@ function Update-CecConnectorModelWithId {
 }
 
 function Remove-CecConnectorUserDate {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector
     )

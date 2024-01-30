@@ -86,7 +86,7 @@
     'Add-CecConnectorPrefix',
     'Remove-CecConnectorPrefix',
     'Update-CecConnectorModelWithId',
-    'Update-CecConnectorCrawlerSchedule',
+    'Set-CecConnectorCrawlerSchedule',
     'Publish-CecConnector',
     'Start-CecConnectorRescan',
     'Get-CecConnectorJobStatus',

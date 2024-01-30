@@ -10,7 +10,7 @@ function Get-CecAttribute {
 
 
 function Set-CecAttribute {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Attributes,
         [Switch]$Force

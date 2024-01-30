@@ -73,7 +73,7 @@ function Get-CecConnector {
 }
 
 function Set-CecConnector {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]
         $Connector,
@@ -125,7 +125,7 @@ function Set-CecConnector {
 }
 
 function Remove-CecConnector {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory)]
         $ConnectorId,

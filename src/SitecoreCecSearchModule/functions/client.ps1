@@ -1,4 +1,4 @@
-function Invoke-CecLogin {
+﻿function Invoke-CecLogin {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password', Justification = 'Obsolete')]
     param(
         [String] $Email,
@@ -22,7 +22,7 @@ function Invoke-CecPasswordAuthentication {
         target   = "https://cec.sitecorecloud.io"
     } | ConvertTo-Json
 
-    $response = Invoke-RestMethod -Uri $url -ContentType application/json -Method POST -Body $body
+    $response = Invoke-RestMethod -Uri $url -ContentType application/json -Method POST -Body $body -UserAgent "SitecoreCecSearchModule"
     $redirectUrl = $response.redirectUrl
     $result = $redirectUrl -match "https://cec.sitecorecloud.io#refresh_token=([^&]+)$"
     if ($result -eq $false -or $Matches.Count -lt 2) {
@@ -62,7 +62,7 @@ function New-CecAccessToken {
     )
 
     $url = "https://discover.sitecorecloud.io/account/1/access-token"
-    $response = Invoke-RestMethod -Method PUT -Uri $url -Headers @{ Authorization = "Bearer ${RefreshToken}" } -ContentType application/json
+    $response = Invoke-RestMethod -Method PUT -Uri $url -Headers @{ Authorization = "Bearer ${RefreshToken}" } -ContentType application/json -UserAgent "SitecoreCecSearchModule"
     $accessToken = $response.accessToken
     Set-Variable -Name "CecAccessToken" -Value $accessToken -Scope Script
     $accessToken
@@ -78,7 +78,7 @@ function Invoke-CecGlobalMethod {
 
     $tokenVar = Get-Variable -Name "CecAccessToken"
     $token = $tokenVar.Value
-    Invoke-RestMethod -Uri "${BaseUrl}${Path}" -Method $Method -Headers @{ Authorization = "Bearer ${token}" } -ContentType "application/json" -Body:$Body
+    Invoke-RestMethod -Uri "${BaseUrl}${Path}" -Method $Method -Headers @{ Authorization = "Bearer ${token}" } -ContentType "application/json" -Body:$Body -UserAgent "SitecoreCecSearchModule"
 }
 
 function Set-CecDomainContext {

@@ -62,47 +62,47 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport    = 
+    FunctionsToExport    =
     'Set-CecRefreshToken',
-    'Get-CecRefreshToken', 
-    'Invoke-RefreshAccessToken', 
-    'New-CecAccessToken', 
-    'Invoke-CecLogin', 
+    'Get-CecRefreshToken',
+    'Invoke-RefreshAccessToken',
+    'New-CecAccessToken',
+    'Invoke-CecLogin',
 
-    'Set-CecDomainContext', 
-    'Invoke-CecGlobalMethod', 
-    'Invoke-CecDomainMethod', 
+    'Set-CecDomainContext',
+    'Invoke-CecGlobalMethod',
+    'Invoke-CecDomainMethod',
 
-    'Get-CecDomain', 
-    'Set-CecDomainContextBy', 
+    'Get-CecDomain',
+    'Set-CecDomainContextBy',
     'Get-CecDomainContext',
 
-    'Get-CecConnectorsInfo', 
+    'Get-CecConnectorsInfo',
     'Get-CecConnectorInfo',
-    'Get-CecConnector', 
-    'Set-CecConnector', 
-    'Write-CecConnector', 
-    'Read-CecConnector', 
-    'Add-CecConnectorPrefix', 
-    'Remove-CecConnectorPrefix', 
-    'Update-CecConnectorModelWithId', 
+    'Get-CecConnector',
+    'Set-CecConnector',
+    'Write-CecConnector',
+    'Read-CecConnector',
+    'Add-CecConnectorPrefix',
+    'Remove-CecConnectorPrefix',
+    'Update-CecConnectorModelWithId',
     'Update-CecConnectorCrawlerSchedule',
-    'Publish-CecConnector', 
-    'Start-CecConnectorRescan', 
-    'Get-CecConnectorJobStatus', 
+    'Publish-CecConnector',
+    'Start-CecConnectorRescan',
+    'Get-CecConnectorJobStatus',
 
-    'Get-CecJobStatus', 
-    'Get-CecJobErrors',
+    'Get-CecJobStatus',
+    'Get-CecJobError',
 
-    'Get-CecAttribute', 
-    'Set-CecAttribute', 
-    'Write-CecAttribute', 
-    'Read-CecAttribute', 
+    'Get-CecAttribute',
+    'Set-CecAttribute',
+    'Write-CecAttribute',
+    'Read-CecAttribute',
 
-    'Get-CecDomainConfig', 
-    'Get-CecCustomerKey', 
-    'Get-CecDnsEntry', 
-    'Get-CecEndpoint', 
+    'Get-CecDomainConfig',
+    'Get-CecCustomerKey',
+    'Get-CecDnsEntry',
+    'Get-CecEndpoint',
     'Get-CecApiKeys'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.

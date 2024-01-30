@@ -30,7 +30,7 @@ function Get-CecJobStatus {
     Invoke-CecDomainMethod -Path $url | Select-Object -ExpandProperty jobs
 }
 
-function Get-CecJobErrors {
+function Get-CecJobError {
     param(
         [Parameter(ValueFromPipelineByPropertyName)]$JobId,
         [Parameter(ValueFromPipeline)]$Job

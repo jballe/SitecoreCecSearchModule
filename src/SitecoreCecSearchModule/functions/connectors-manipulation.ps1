@@ -87,7 +87,8 @@ function Remove-CecConnectorPrefix {
     }
 }
 
-function Update-CecConnectorCrawlerSchedule {
+function Set-CecConnectorCrawlerSchedule {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector,
         [ValidateSet('hour', 'day', 'week')]

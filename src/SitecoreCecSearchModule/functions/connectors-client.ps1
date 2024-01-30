@@ -98,7 +98,7 @@ function Set-CecConnector {
                 $obj.content.PSObject.Properties.Remove("crawler")
                 $result = Invoke-CecDomainMethod -Path $url -Method POST -Body $obj
                 $id = $result.connector.connectorId
-                $Connector | Update-CecConnectorModelWithIds -ConnectorWithIds $result
+                $Connector | Update-CecConnectorModelWithId -ConnectorWithIds $result
             }
 
             $urlPath = "${url}/${id}${versionPath}"

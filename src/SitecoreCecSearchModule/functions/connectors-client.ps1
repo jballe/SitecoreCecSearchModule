@@ -151,7 +151,8 @@ function Publish-CecConnector {
 
     $url = "/microservices/common-editor/connectors/${ConnectorId}/versions/draft"
     if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
-        Invoke-CecDomainMethod -Path $url -Method POST | Out-Null
+        $result = Invoke-CecDomainMethod -Path $url -Method POST
+        $Connector | Update-CecConnectorModelWithId -ConnectorWithIds $result.connector
     }
     else {
         Write-Information "Would have made POST request to $url"
@@ -186,7 +187,8 @@ function Start-CecConnectorRescan {
 
         $urlPath = "/microservices/job-orchestrator/jobs"
         if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
-            Invoke-CecDomainMethod -Path $urlPath -Method POST -Body $body
+            $result = Invoke-CecDomainMethod -Path $urlPath -Method POST -Body $body
+            return $result
         }
         else {
             Write-Information ("Would have called PUT on ${urlPath} with body:`n{0}" -f ($body | ConvertTo-Json -Depth 30))

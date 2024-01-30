@@ -1,4 +1,4 @@
-﻿function Invoke-CecLogin {
+function Invoke-CecLogin {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password', Justification = 'Obsolete')]
     param(
         [String] $Email,
@@ -123,6 +123,7 @@ function Invoke-CecDomainMethod {
         Uri         = $url
         Method      = $Method
         Headers     = @{ Authorization = "Bearer ${token}" }
+        UserAgent   = "SitecoreCecSearchModule"
         ContentType = "application/json"
         #Proxy       = "http://127.0.0.1:8888"
     }

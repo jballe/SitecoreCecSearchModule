@@ -1,4 +1,4 @@
-﻿function Add-CecConnectorPrefix {
+function Add-CecConnectorPrefix {
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector,
         [String]$Suffix = "",
@@ -30,7 +30,7 @@
             $params.ScriptTo = ("'{0}'" -f $ScriptToken)
             $params.ScriptFrom = ("'{0}'" -f $ScriptReplacement)
         }
-        $Connector | Invoke-CecConnectorReplacement @params
+        $Connector | Invoke-CecConnectorReplacement @params | Out-Null
 
         return $Connector
     }

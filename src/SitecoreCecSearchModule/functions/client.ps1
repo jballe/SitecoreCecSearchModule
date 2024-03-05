@@ -1,4 +1,4 @@
-function Invoke-CecLogin {
+﻿function Invoke-CecLogin {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password', Justification = 'Obsolete')]
     param(
         [String] $Email,
@@ -64,8 +64,17 @@ function New-CecAccessToken {
     $url = "https://discover.sitecorecloud.io/account/1/access-token"
     $response = Invoke-RestMethod -Method PUT -Uri $url -Headers @{ Authorization = "Bearer ${RefreshToken}" } -ContentType application/json -UserAgent "SitecoreCecSearchModule"
     $accessToken = $response.accessToken
-    Set-Variable -Name "CecAccessToken" -Value $accessToken -Scope Script
+    Set-CecAccessToken -AccessToken $accessToken
     $accessToken
+}
+
+function Set-CecAccessToken {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    param(
+        $AccessToken
+    )
+
+    Set-Variable -Name "CecAccessToken" -Value $AccessToken -Scope Script
 }
 
 function Invoke-CecGlobalMethod {
@@ -126,7 +135,7 @@ function Invoke-CecDomainMethod {
         Headers     = @{ Authorization = "Bearer ${token}" }
         UserAgent   = "SitecoreCecSearchModule"
         ContentType = "application/json"
-        #Proxy       = "http://127.0.0.1:8888"
+        Proxy       = "http://127.0.0.1:8888"
     }
     if ($Null -ne $Body) {
         $params.Body = $Body | ConvertTo-Json -Depth 15

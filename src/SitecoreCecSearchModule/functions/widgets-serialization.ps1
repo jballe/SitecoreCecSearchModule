@@ -1,0 +1,64 @@
+function Write-CecWidget {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]$Widget,
+        [Parameter(Mandatory)][String]$Path,
+        [Switch]$Subfolder,
+        [Switch]$Clean
+    )
+
+    begin {
+        $destinationPath = $Path
+        if ($Subfolder) {
+            $destinationPath = join-path $destinationPath "widgets"
+        }
+        If (-not (Test-Path $destinationPath -PathType Container)) {
+            New-Item $destinationPath -ItemType Directory | Out-Null
+        }
+        $destinationPath = Resolve-Path $destinationPath
+
+        if($Clean) {
+            Get-ChildItem $destinationPath | Remove-Item -Force
+        }
+    }
+
+    process {
+        $type = $Widget.type
+        $folder = Join-Path $destinationPath $type
+        If (-not (Test-Path $folder -PathType Container)) {
+            New-Item $folder -ItemType Directory | Out-Null
+        }
+
+        $json = $Widget | Remove-CecWidgetUserDates | ConvertTo-Json -Depth 15
+        $filePath = Join-Path $folder ("{0}.json" -f $Widget.name)
+        Set-Content -LiteralPath $filePath -Value $json -Force
+    }
+}
+
+function Remove-CecWidgetUserDates {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]$Widget
+    )
+
+    process {
+        $Widget.PSObject.Properties.Remove('createdAt')
+        $Widget.PSObject.Properties.Remove('updatedAt')
+        $Widget.PSObject.Properties.Remove('status')
+        $Widget.PSObject.Properties.Remove('userId')
+        $Widget.PSObject.Properties.Remove('version')
+        $Widget.PSObject.Properties.Remove('widgetId')
+        $Widget.PSObject.Properties.Remove('parentWidgetId')
+
+        foreach ($v in $Widget.variations) {
+            $Widget.PSObject.Properties.Remove('createdAt')
+            $Widget.PSObject.Properties.Remove('updatedAt')
+            $Widget.PSObject.Properties.Remove('status')
+            $Widget.PSObject.Properties.Remove('userId')
+            $Widget.PSObject.Properties.Remove('version')
+            $Widget.PSObject.Properties.Remove('variationId')
+        }
+
+        $Widget
+    }
+}

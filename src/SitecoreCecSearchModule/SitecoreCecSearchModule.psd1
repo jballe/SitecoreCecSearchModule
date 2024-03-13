@@ -99,6 +99,10 @@
     'Set-CecAttribute',
     'Write-CecAttribute',
     'Read-CecAttribute',
+    
+    'Get-CecWidgetInfo',
+    'Get-CecWidget',
+    'Write-CecWidget',
 
     'Get-CecDomainConfig',
     'Get-CecCustomerKey',

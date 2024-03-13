@@ -29,13 +29,13 @@ function Write-CecWidget {
             New-Item $folder -ItemType Directory | Out-Null
         }
 
-        $json = $Widget | Remove-CecWidgetUserDates | ConvertTo-Json -Depth 15
+        $json = $Widget | Remove-CecWidgetUserDate | ConvertTo-Json -Depth 15
         $filePath = Join-Path $folder ("{0}.json" -f $Widget.name)
         Set-Content -LiteralPath $filePath -Value $json -Force
     }
 }
 
-function Remove-CecWidgetUserDates {
+function Remove-CecWidgetUserDate {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Widget

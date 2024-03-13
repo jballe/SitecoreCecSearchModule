@@ -1,4 +1,4 @@
-function Get-CecFeatures {
+function Get-CecFeatureConfig {
     [CmdletBinding(DefaultParameterSetName='-Current')]
     param(
         [Parameter(ParameterSetName='-Current')][Switch]$Current,
@@ -18,7 +18,7 @@ function Get-CecFeatures {
     return $result.search
 }
 
-function Set-CecFeatures {
+function Set-CecFeatureConfig {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Features,
@@ -27,7 +27,7 @@ function Set-CecFeatures {
     )
 
     process {
-        $existing = Get-CecFeatures -All
+        $existing = Get-CecFeatureConfig -All
 
         $body = @{
             featureConfigId = $existing.featureConfigId

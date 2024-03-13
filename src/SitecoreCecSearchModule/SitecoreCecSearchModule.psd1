@@ -100,8 +100,8 @@
     'Write-CecAttribute',
     'Read-CecAttribute',
 
-    'Get-CecFeatures',
-    'Write-CecFeatures',
+    'Get-CecFeatureConfig',
+    'Write-CecFeatureConfig',
     
     'Get-CecWidgetInfo',
     'Get-CecWidget',

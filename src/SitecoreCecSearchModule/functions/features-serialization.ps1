@@ -1,4 +1,4 @@
-function Write-CecFeatures {
+function Write-CecFeatureConfig {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Features,

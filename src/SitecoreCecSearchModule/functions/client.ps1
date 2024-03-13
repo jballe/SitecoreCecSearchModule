@@ -135,7 +135,7 @@ function Invoke-CecDomainMethod {
         Headers     = @{ Authorization = "Bearer ${token}" }
         UserAgent   = "SitecoreCecSearchModule"
         ContentType = "application/json"
-        Proxy       = "http://127.0.0.1:8888"
+        #Proxy       = "http://127.0.0.1:8888"
     }
     if ($Null -ne $Body) {
         $params.Body = $Body | ConvertTo-Json -Depth 15

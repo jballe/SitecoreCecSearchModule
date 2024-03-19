@@ -100,12 +100,21 @@
     'Write-CecAttribute',
     'Read-CecAttribute',
 
+    'Get-CecFeatureConfig',
+    'Write-CecFeatureConfig',
+    
+    'Get-CecWidgetInfo',
+    'Get-CecWidget',
+    'Write-CecWidget',
+
     'Get-CecDomainConfig',
     'Get-CecCustomerKey',
     'Get-CecDnsEntry',
     'Get-CecEndpoint',
-    'Get-CecApiKeys'
+    'Get-CecApiKeys',
 
+    'Invoke-GetAndWriteAllCecConfiguration'
+    
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = @()
 

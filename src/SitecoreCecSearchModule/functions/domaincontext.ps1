@@ -35,7 +35,12 @@ function Set-CecDomainContextBy {
 
     $domain = Get-CecDomain -Url $Url -Name $Name -Region $Region -AccountId $AccountId -Active $Active
 
-    if ($domain.Count -ne 1) {
+    if ($Null -eq $domain) {
+        Write-Error ("Did not find any domains for the requested properties" -f $domain.Count)
+        return
+    }
+
+    if($domain.Count -ne 1) {
         Write-Error ("Found {0} domains, must match a single domain" -f $domain.Count)
         return
     }

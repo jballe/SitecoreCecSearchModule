@@ -18,7 +18,7 @@ function Write-CecWidget {
         $destinationPath = Resolve-Path $destinationPath
 
         if($Clean) {
-            Get-ChildItem $destinationPath | Remove-Item -Force
+            Get-ChildItem $destinationPath | Remove-Item -Force -Recurse
         }
     }
 

@@ -1,4 +1,4 @@
-function Invoke-GetAndWriteCecConfigs {
+function Invoke-GetAndWriteAllCecConfiguration {
     param(
         $Path,
         $EnvToken,
@@ -6,7 +6,7 @@ function Invoke-GetAndWriteCecConfigs {
         $Prefix,
         $TextToken,
         $ScriptToken,
-        $Domain
+        $Domains
     )
 
     Get-CecAttribute | Write-CecAttribute -Path $Path -Force

@@ -23,11 +23,18 @@ function Invoke-CecPasswordAuthentication {
     } | ConvertTo-Json
 
     $response = Invoke-RestMethod -Uri $url -ContentType application/json -Method POST -Body $body -UserAgent "SitecoreCecSearchModule"
+    if($response.PSObject.Properties.Name -contains "error-id") {
+        throw  ("Error from login: {0} {1} ({2})" -f $response.type, $response.message, $response.code)
+    }
+    if(-not $response.PSObject.Properties.Name -contains "redirectUrl") {
+        throw ("Unexpected login response:`n{0}" -f ($response | ConvertTo-Json -Depth 15))
+    }
+
     $redirectUrl = $response.redirectUrl
     $result = $redirectUrl -match "https://cec.sitecorecloud.io#refresh_token=([^&]+)$"
     if ($result -eq $false -or $Matches.Count -lt 2) {
         Write-Error $response
-        Write-Error "Could not login"
+        throw "Could not login, did not find refresh_token"
     }
 
     $refreshToken = $Matches[1]

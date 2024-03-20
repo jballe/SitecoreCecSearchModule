@@ -133,6 +133,7 @@ function Read-CecConnector {
     $connector
 }
 
+$taggerSuffix = "`nmodule.exports = { extract };`n"
 
 function Write-Tagger {
     param(
@@ -147,7 +148,7 @@ function Write-Tagger {
     $fileName = "extractor_${Index}_${tag}.${type}"
     $taggerPath = (Join-Path $ConnectorPath $fileName)
     if ($Null -ne $Tagger -and $Tagger.PSObject.Properties.Name -contains "source" -and $Null -ne $Tagger.Source) {
-        $source = ($Tagger.source).Replace("\r\n", "`n").Replace("\n", "`n").Replace("function ", "export function ")
+        $source = ($Tagger.source).Replace("\r\n", "`n").Replace("\n", "`n") + $taggerSuffix
         Set-Content -Value $source -Path $taggerPath
         $tagger.source = "<exported to ${fileName}>"
     }
@@ -166,7 +167,7 @@ function Read-Tagger {
     $fileName = "extractor_${Index}_${tag}.${type}"
     $taggerPath = (Join-Path $ConnectorPath $fileName)
     if (Test-Path $taggerPath) {
-        $Tagger.source = (Get-Content $taggerPath -Raw).Trim().Replace("export function ", "function ")
+        $Tagger.source = (Get-Content $taggerPath -Raw).Trim().Replace($taggerSuffix, "")
     }
 }
 

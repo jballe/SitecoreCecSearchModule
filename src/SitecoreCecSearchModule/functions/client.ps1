@@ -1,4 +1,4 @@
-﻿function Invoke-CecLogin {
+function Invoke-CecLogin {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password', Justification = 'Obsolete')]
     param(
         [String] $Email,
@@ -14,6 +14,8 @@ function Invoke-CecPasswordAuthentication {
         $Email,
         [String] $Password
     )
+    $ErrorActionPreference = "STOP"
+
     $url = "https://discover.sitecorecloud.io/account/1/authenticate/password/cec"
     $body = @{
         email    = $Email

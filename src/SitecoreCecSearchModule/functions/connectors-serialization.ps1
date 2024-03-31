@@ -167,7 +167,7 @@ function Read-Tagger {
     $fileName = "extractor_${Index}_${tag}.${type}"
     $taggerPath = (Join-Path $ConnectorPath $fileName)
     if (Test-Path $taggerPath) {
-        $Tagger.source = (Get-Content $taggerPath -Raw).Trim().Replace($taggerSuffix.Trim(), "")
+        $Tagger.source = (Get-Content $taggerPath -Raw).Trim().Replace($taggerSuffix.Trim(), "").Replace("`r`n", "`n")
     }
 }
 
@@ -258,14 +258,12 @@ function Read-Trigger {
                 }
             }
             else {
-                $body += $line + "\n"
+                $body += $line + "`n"
             }
         }
 
         # Remove the last \n
-        while ($body.EndsWith("\n")) {
-            $body = $body.Substring(0, $body.Length - 2)
-        }
+        $body = $body.TrimEnd()
 
         $trigger.request = @{
             method  = $method

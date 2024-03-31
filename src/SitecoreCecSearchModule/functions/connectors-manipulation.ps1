@@ -247,9 +247,20 @@ function Update-CecConnectorModelWithId {
         $Connector | AddOrSetPropertyValue -PropertyName "status" -Value  $ConnectorWithIds.status
         $Connector.content | AddOrSetPropertyValue -PropertyName "externalId" -Value  $ConnectorWithIds.content.externalId
 
-        $newVersion = $ConnectorWithIds.version
-        if ($ConnectorWithIds.status -ne "draft") {
-            $newVersion = $ConnectorWithIds.version + 1
+        return ($Connector | Update-CecConnectorVersion )
+    }
+}
+
+function Update-CecConnectorVersion {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]$Connector
+    )
+
+    process {
+        $newVersion = $Connector.version
+        if ($Connector.status -ne "draft") {
+            $newVersion = $Connector.version + 1
         }
         $Connector | AddOrSetPropertyValue -PropertyName "version" -Value $newVersion
 

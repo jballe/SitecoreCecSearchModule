@@ -78,7 +78,6 @@
     'Set-CecDomainContextBy',
     'Get-CecDomainContext',
 
-    'Get-CecConnectorsInfo',
     'Get-CecConnectorInfo',
     'Get-CecConnector',
     'Set-CecConnector',

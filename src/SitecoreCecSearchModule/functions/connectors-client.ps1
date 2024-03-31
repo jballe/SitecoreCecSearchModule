@@ -1,4 +1,4 @@
-﻿function Get-CecConnectorsInfo {
+﻿function Get-CecConnectorInfo {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Prefix', Justification = 'false positive')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Suffix', Justification = 'false positive')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Name', Justification = 'false positive')]
@@ -24,22 +24,6 @@
     else {
         Write-Information "Would have made request for $urlPath"
     }
-}
-
-function Get-CecConnectorInfo {
-    param(
-        [Parameter(Mandatory)]
-        $Name
-    )
-
-    $connector = Get-CecConnectorsInfo -Name $Name
-
-    if ($Null -eq $connector -or $connector.Length -ne 1) {
-        Write-Error ("Found {0} connector, must match a single source" -f $connector.Count)
-        return
-    }
-
-    $connector[0]
 }
 
 function Get-CecConnector {

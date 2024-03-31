@@ -15,7 +15,7 @@ Import-Module (Join-Path $PSScriptRoot "../SitecoreCecSearchModule") -Force
 Invoke-CecLogin -Email $Email -Password $Password
 Set-CecDomainContextBy -Url $AccountDomain
 
-$connectors = Get-CecConnectorsInfo -Suffix "_${EnvName}" `
+$connectors = Get-CecConnectorInfo -Suffix "_${EnvName}" `
 
 $connectors | Format-Table -Property name, status, updatedAt, message
 

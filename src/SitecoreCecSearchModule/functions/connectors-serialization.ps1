@@ -167,7 +167,7 @@ function Read-Tagger {
     $fileName = "extractor_${Index}_${tag}.${type}"
     $taggerPath = (Join-Path $ConnectorPath $fileName)
     if (Test-Path $taggerPath) {
-        $Tagger.source = (Get-Content $taggerPath -Raw).Trim().Replace($taggerSuffix, "")
+        $Tagger.source = (Get-Content $taggerPath -Raw).Trim().Replace($taggerSuffix.Trim(), "")
     }
 }
 

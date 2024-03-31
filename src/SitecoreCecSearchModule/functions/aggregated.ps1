@@ -1,11 +1,13 @@
 function Invoke-GetAndWriteAllCecConfiguration {
+    [CmdletBinding()]
     param(
+        [Parameter(Mandatory=$true)]
         $Path,
-        $EnvToken,
-        $Suffix,
-        $Prefix,
-        $TextToken,
-        $ScriptToken,
+        [string]$EnvToken,
+        [string]$Suffix,
+        [string]$Prefix,
+        [string]$TextToken,
+        [string]$ScriptToken,
         $Domains
     )
 
@@ -18,12 +20,14 @@ function Invoke-GetAndWriteAllCecConfiguration {
     }
 
     $connectorsPath = Join-Path $Path "connectors"
-    Get-CecConnectorsInfo -Suffix $Suffix -Prefix $Prefix | Get-CecConnector `
+    Get-CecConnectorInfo -Suffix $Suffix -Prefix $Prefix | Get-CecConnector `
     | Remove-CecConnectorPrefix -Suffix:$Suffix -Prefix:$Prefix -TextToken:$TextToken -ScriptToken:$ScriptToken -Domains:$Domains `
     | Write-CecConnector -Path $connectorsPath -Subfolder
 
     Get-CecFeatureConfig | Write-CecFeatureConfig -Path $Path
 
     Get-CecWidgetInfo | Get-CecWidget | Write-CecWidget -Path $Path -Subfolder -Clean
+
+    Get-CecKeywordInfo | Write-CecKeywordInfo -Path $Path -Subfolder -Clean
 }
 

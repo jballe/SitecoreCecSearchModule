@@ -7,10 +7,12 @@ function Write-CecFeatureConfig {
     )
 
     begin {
-        if($Subfolder) {
-        $folder = Join-Path $Path "features" 
-        } else {}
-        $folder = Resolve-Path $Path
+        if ($Subfolder) {
+            $folder = Join-Path $Path "features" 
+        }
+        else {
+            $folder = Resolve-Path $Path
+        }
     }
 
     process {
@@ -20,9 +22,9 @@ function Write-CecFeatureConfig {
             foreach ($fname in $Features.$area.PSObject.Properties.Name) {
                 $relativeFolder = "features/${area}/${fname}"
                 $folder = Join-Path $Path $relativeFolder
-                If(-not (Test-Path $folder -PathType Container)) { New-Item $folder -ItemType Directory -Force | Out-Null }
+                If (-not (Test-Path $folder -PathType Container)) { New-Item $folder -ItemType Directory -Force | Out-Null }
 
-                foreach($obj in $Features.$area.$fname) {
+                foreach ($obj in $Features.$area.$fname) {
                     $name = $obj.name
                     $filename = Join-Path $folder "${name}.json"
                     Set-Content -Path $filename -Value ($obj | ConvertTo-Json -Depth 15)

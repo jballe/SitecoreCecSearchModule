@@ -7,9 +7,7 @@ param(
     $SiteUrlWww,
     $SiteUrlApp,
     $SiteUrlCm,
-    $Path = (Join-Path $PSScriptRoot "../../out/${AccountDomain}"),
-    $Force
-
+    $Path = (Join-Path $PSScriptRoot "../../out/${AccountDomain}")
 )
 
 $ErrorActionPreference = "STOP"
@@ -26,4 +24,4 @@ $domains = @{
 }
 
 Write-Host "Exporting to $Path ..."
-Invoke-GetAndWriteAllCecConfiguration -Path $Path EnvToken $EnvName -Domains $domains -Force:$Force
+Invoke-GetAndWriteAllCecConfiguration -Path $Path -EnvToken $EnvName -Domains $domains

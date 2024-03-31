@@ -2,8 +2,10 @@ name: CI
 
 on:
   push:
-    branches:
-      - '*'
+    branches-ignore: 
+      - temp
+    tags-ignore: 
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
 
 permissions:

@@ -27,5 +27,7 @@ function Invoke-GetAndWriteAllCecConfiguration {
     Get-CecFeatureConfig | Write-CecFeatureConfig -Path $Path
 
     Get-CecWidgetInfo | Get-CecWidget | Write-CecWidget -Path $Path -Subfolder -Clean
+
+    Get-CecKeywordInfo | Write-CecKeywordInfo -Path $Path -Subfolder -Clean
 }
 

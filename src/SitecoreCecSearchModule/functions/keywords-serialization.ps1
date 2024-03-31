@@ -15,7 +15,7 @@ function Write-CecKeywordInfo {
             $folder = Resolve-Path $Path
         }
 
-        if(-not (Test-Path $folder -PathType Container)) {
+        if (-not (Test-Path $folder -PathType Container)) {
             New-Item $folder -ItemType Directory | Out-Null
         }
 
@@ -41,16 +41,18 @@ function Remove-CecKeywordUserDate {
         [Parameter(ValueFromPipeline, Mandatory)]$InputObject
     )
 
-    $InputObject.PSObject.Properties.Remove('keywordId')
-    $InputObject.PSObject.Properties.Remove('createdAt')
-    $InputObject.PSObject.Properties.Remove('updatedAt')
-    $InputObject.PSObject.Properties.Remove('userId')
-    $InputObject.PSObject.Properties.Remove('version')
+    process {
+        $InputObject.PSObject.Properties.Remove('keywordId')
+        $InputObject.PSObject.Properties.Remove('createdAt')
+        $InputObject.PSObject.Properties.Remove('updatedAt')
+        $InputObject.PSObject.Properties.Remove('userId')
+        $InputObject.PSObject.Properties.Remove('version')
 
-    if ($InputObject.status -eq "live") {
-        $InputObject.PSObject.Properties.Remove('status')
-        $InputObject.PSObject.Properties.Remove('operation')
+        if ($InputObject.status -eq "live") {
+            $InputObject.PSObject.Properties.Remove('status')
+            $InputObject.PSObject.Properties.Remove('operation')
+        }
+
+        $InputObject
     }
-
-    $InputObject
 }

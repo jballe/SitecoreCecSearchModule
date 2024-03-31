@@ -10,8 +10,6 @@ param(
 
 $ErrorActionPreference = "STOP"
 
-Import-Module (Join-Path $PSScriptRoot "../SitecoreCecSearchModule") -Force
-
 Invoke-CecLogin -Email $Email -Password $Password
 Set-CecDomainContextBy -Url $AccountDomain
 

@@ -14,8 +14,6 @@ param(
 $ErrorActionPreference = "STOP"
 $connectorsPath = Join-Path ${Path} "connectors" -Resolve
 
-Import-Module (Join-Path $PSScriptRoot "../SitecoreCecSearchModule") -Force
-
 Invoke-CecLogin -Email $Email -Password $Password
 Set-CecDomainContextBy -Url $AccountDomain
 
@@ -30,5 +28,6 @@ foreach($f in $folders) {
     $connector `
     | Add-CecConnectorPrefix  -Suffix "_${EnvName}" -Domains $domains -TextToken "${EnvName}" -ScriptToken "_${EnvName}" `
     | Update-CecConnectorModelWithId -FetchConnectorWithSameName `
-    | Set-CecConnector -Publish -Force:$Force
+    | Set-CecConnector -Publish -Force:$Force `
+    | Format-Table -Property name, status, connectorId -AutoSize
 }

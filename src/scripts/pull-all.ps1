@@ -12,7 +12,14 @@ param(
 
 $ErrorActionPreference = "STOP"
 
-Import-Module (Join-Path $PSScriptRoot "../SitecoreCecSearchModule") -Force
+# Import-Module (Join-Path $PSScriptRoot "../SitecoreCecSearchModule") -Force
+
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+
+$moduleName = "SitecoreCecSearchModule"
+Install-Module -Repository PSGallery $moduleName  -SkipPublisherCheck
+Write-Host ("Using version {0}" -f  (Get-InstalledModule $moduleName).Version.ToString() -join ",")
 
 Invoke-CecLogin -Email $Email -Password $Password
 Set-CecDomainContextBy -Url $AccountDomain

@@ -1,6 +1,6 @@
 param(
     $PackageName = "SitecoreCecSearchModule",
-    $Version = "0.1.0-betaworkflows0051"
+    $Version = "0.1.9-rc0001"
 )
 $ErrorActionPreference = "STOP"
 

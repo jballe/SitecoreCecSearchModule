@@ -4,6 +4,7 @@ param(
     $Password,
     $Environments = @("TST", "UAT", "PRD"),
     $AccountDomain,
+    $Domains,
     $Path = (Join-Path $PSScriptRoot "../../out/${AccountDomain}")
 )
 
@@ -20,6 +21,6 @@ foreach ($name in $Environments) {
     Write-Host "Fetching ${name} to ${connectorsPath}"
 
     Get-CecConnectorInfo -Suffix $Suffix | Get-CecConnector `
-    | Remove-CecConnectorPrefix -Suffix $Suffix -TextToken:$TextToken -ScriptToken $ScriptToken `
+    | Remove-CecConnectorPrefix -Suffix $Suffix -TextToken:$TextToken -ScriptToken $ScriptToken -Domain:$Domains `
     | Write-CecConnector -Path $connectorsPath -Subfolder
 }

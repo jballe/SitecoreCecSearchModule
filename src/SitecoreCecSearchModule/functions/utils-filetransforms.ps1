@@ -29,7 +29,7 @@ function Convert-HttpJsonToGraph {
     $graphql = Convert-HttpJsonToGraphBody -Body $body
     $newLines += $graphql
     #if ($Null -ne $GraphQlDestinationPath) { Set-Content -Path $GraphQlDestinationPath -Value $graphql -Encoding $Encoding }
-    if ($Null -ne $DestinationPath) { Set-Content -Path $GraphHttpDestinationPath -Value $newLines -Encoding $Encoding }
+    if ($Null -ne $DestinationPath) { Set-Content -Path $DestinationPath -Value $newLines -Encoding $Encoding }
 }
 
 function Convert-HttpGraphToJson {

@@ -1,8 +1,7 @@
 function Convert-HttpJsonToGraph {
     param(
-        [Parameter(Mandatory)][ValidateScript({ Test-Path $_ -PathType Leaf })]
+        [Parameter(Mandatory)][string][ValidateScript({ Test-Path $_ -PathType Leaf })]
         $Path,
-        #$GraphQlDestinationPath = ($Path.Replace(".http", ".graphql")),
         $DestinationPath = ($Path.Replace(".http", ".graph.http")),
         $Encoding = "UTF8"
     )
@@ -35,7 +34,7 @@ function Convert-HttpJsonToGraph {
 
 function Convert-HttpGraphToJson {
     param(
-        [Parameter(Mandatory)][ValidateScript({ Test-Path $_ -PathType Leaf })]
+        [Parameter(Mandatory)][string][ValidateScript({ Test-Path $_ -PathType Leaf })]
         $Path,
         $DestinationPath = ($Path.Replace(".graph.http", ".http")),
         $Encoding = "UTF8"

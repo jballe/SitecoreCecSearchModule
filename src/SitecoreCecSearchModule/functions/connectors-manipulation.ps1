@@ -153,13 +153,14 @@ function Invoke-CecConnectorReplacement {
                         continue
                     }
 
+                    $crawlerConfig = $Connector.content.crawler.$crawlerType
+
                     if ($crawlerConfig.PSObject.Properties.Name.Contains("allowedDomains")) {
                         $hostFrom = $domainValue -replace "^https?://", ""
                         $hostTo = $domainTo -replace "^https?://", ""
                         $crawlerConfig.allowedDomains = $crawlerConfig.allowedDomains | ForEach-Object { $_.Replace($hostFrom, $hostTo) }
                     }
 
-                    $crawlerConfig = $Connector.content.crawler.$crawlerType
                     if ($crawlerConfig.PSObject.Properties.Name.Contains("triggers")) {
                         foreach ($t in $crawlerConfig.triggers) {
                             if ($t.PSObject.Properties.Name.Contains("sitemapIndex")) {

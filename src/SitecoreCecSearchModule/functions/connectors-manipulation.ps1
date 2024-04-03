@@ -27,8 +27,8 @@ function Add-CecConnectorPrefix {
             TextTo   = $TextToken
         }
         if ("${ScriptToken}" -ne "") {
-            $params.ScriptTo = ("'{0}'" -f $ScriptToken)
-            $params.ScriptFrom = ("'{0}'" -f $ScriptReplacement)
+            $params.ScriptTo = ('"{0}"' -f $ScriptToken)
+            $params.ScriptFrom = @( ("'{0}'" -f $ScriptReplacement), ('"{0}"' -f $ScriptReplacement) )
         }
         $Connector | Invoke-CecConnectorReplacement @params | Out-Null
 
@@ -77,7 +77,7 @@ function Remove-CecConnectorPrefix {
                 ("'{0}'" -f $ScriptToken),
                 ('"{0}"' -f $ScriptToken)
             )
-            $params.ScriptTo = ("'{0}'" -f $ScriptReplacement)
+            $params.ScriptTo = ('"{0}"' -f $ScriptReplacement)
         }
         $result = $Connector `
         | Invoke-CecConnectorReplacement @params `

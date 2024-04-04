@@ -19,7 +19,7 @@ function Convert-HttpJsonToGraph {
         }
 
         if ($found) {
-            $body += $line
+            $body += "${line}`n"
         }
         else {
             $newLines += $line
@@ -51,7 +51,7 @@ function Convert-HttpGraphToJson {
         }
 
         if ($found) {
-            $body += $line
+            $body += @($line)
         }
         elseif ($line.Trim() -ne "X-REQUEST-TYPE: GraphQL") {
             $newLines += $line
@@ -69,7 +69,7 @@ function Convert-HttpJsonToGraphBody {
     )
 
     $json = ConvertFrom-Json $Body
-    $query = $json.query
+    $query = $json.query.Replace("\n", "`n")
     return $query
 }
 

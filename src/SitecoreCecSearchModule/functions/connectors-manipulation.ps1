@@ -53,6 +53,10 @@ function Remove-CecConnectorPrefix {
     )
 
     begin {
+        if($Domains -eq $Null) {
+            $Domains = [Hashtable]@{}
+        }
+        
         if ("${Domain}" -ne "" -and "${DomainReplacement}" -ne "") {
             $Domains[$DomainReplacement] = $Domain
         }
@@ -158,7 +162,7 @@ function Invoke-CecConnectorReplacement {
                     if ($crawlerConfig.PSObject.Properties.Name.Contains("allowedDomains")) {
                         $hostFrom = $domainValue -replace "^https?://", ""
                         $hostTo = $domainTo -replace "^https?://", ""
-                        $crawlerConfig.allowedDomains = $crawlerConfig.allowedDomains | ForEach-Object { $_.Replace($hostFrom, $hostTo) }
+                        $crawlerConfig.allowedDomains = @() + ($crawlerConfig.allowedDomains | ForEach-Object { $_.Replace($hostFrom, $hostTo) } )
                     }
 
                     if ($crawlerConfig.PSObject.Properties.Name.Contains("triggers")) {

@@ -1,7 +1,7 @@
 function AddOrSetPropertyValue {
     param(
         [Parameter(ValueFromPipeline, Mandatory)]
-        $InputObject,
+        [PSCustomObject]$InputObject,
 
         [Parameter(Mandatory)]
         $PropertyName,
@@ -12,7 +12,7 @@ function AddOrSetPropertyValue {
 
     process {
 
-        if ($InputObject.PSObject.Properties.Name -contains $PropertyName) {
+        if (@($InputObject.PSObject.Properties).Count -gt 0 -and $InputObject.PSObject.Properties.Name -contains $PropertyName) {
             $InputObject.$PropertyName = $Value
         }
         else {

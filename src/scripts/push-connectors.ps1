@@ -8,6 +8,7 @@ param(
     $SiteUrlWww,
     $SiteUrlCm,
     $Path = (Join-Path $PSScriptRoot "../../out/${AccountDomain}"),
+    $VercelBypassKey,
     [Switch]$Force
 )
 
@@ -27,6 +28,7 @@ foreach($f in $folders) {
     $connector = Read-CecConnector -Path $f.FullName
     $connector `
     | Add-CecConnectorPrefix  -Suffix "_${EnvName}" -Domains $domains -TextToken "${EnvName}" -ScriptToken "_${EnvName}" `
+    | Add-CecConnectorVercelBypassProtection -BypassProtectionKey $VercelBypassKey
     | Update-CecConnectorModelWithId -FetchConnectorWithSameName `
     | Set-CecConnector -Publish -Force:$Force `
     | Format-Table -Property name, status, connectorId -AutoSize

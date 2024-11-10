@@ -1,28 +1,34 @@
 function Invoke-GetAndWriteAllCecConfiguration {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $Path,
         [string]$EnvToken,
         [string]$Suffix,
         [string]$Prefix,
         [string]$TextToken,
         [string]$ScriptToken,
-        $Domains
+        $Domains,
+        [Switch]$SkipConnectorReplacement
     )
 
     Get-CecAttribute | Write-CecAttribute -Path $Path -Force
 
-    if("${EnvToken}" -ne "" -and "${Suffix}" -eq "" -and "${Prefix}" -eq "" -and "${TextToken}" -eq "" -and "${ScriptToken}" -eq "") {
+    if ("${EnvToken}" -ne "" -and "${Suffix}" -eq "" -and "${Prefix}" -eq "" -and "${TextToken}" -eq "" -and "${ScriptToken}" -eq "") {
         $Suffix = "_${EnvToken}"
         $TextToken = "${EnvToken}"
         $ScriptToken = "_${EnvToken}"
     }
 
     $connectorsPath = Join-Path $Path "connectors"
-    Get-CecConnectorInfo -Suffix $Suffix -Prefix $Prefix | Get-CecConnector `
-    | Remove-CecConnectorPrefix -Suffix:$Suffix -Prefix:$Prefix -TextToken:$TextToken -ScriptToken:$ScriptToken -Domains:$Domains `
-    | Write-CecConnector -Path $connectorsPath -Subfolder
+    $connectors = Get-CecConnectorInfo -Suffix $Suffix -Prefix $Prefix | Get-CecConnector
+    if ("${EnvToken}" -ne "" -and -not $SkipConnectorReplacement) {
+        $connectors = $connectors | Remove-CecConnectorPrefix -Suffix:$Suffix -Prefix:$Prefix -TextToken:$TextToken -ScriptToken:$ScriptToken -Domains:$Domains
+    }
+    if(-not $SkipConnectorReplacement) {
+        $connectors = $connectors | Remove-CecConnectorVercelBypassProtection
+    }
+    $connectors | Write-CecConnector -Path $connectorsPath -Subfolder
 
     Get-CecFeatureConfig | Write-CecFeatureConfig -Path $Path
 

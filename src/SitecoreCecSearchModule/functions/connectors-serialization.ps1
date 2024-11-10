@@ -66,6 +66,15 @@ function Write-CecConnector {
 
                         $docIndex++
                     }
+
+                    if ($crawlerConfig.extractors.PSObject.Properties.Name -contains "locales") {
+                        $locales = $crawlerConfig.extractors.locales
+                        $localesIndex = 0
+                        foreach ($locale in $locales | Where-object { $_.type -eq "js" }) {
+                            Write-LocaleExtractor -ConnectorPath $destinationPath -LocaleObj $locale -Type $locale.type -Index $localesIndex
+                            $localesIndex++
+                        }
+                    }
                 }
 
                 if ($crawlerConfig.PSObject.Properties.Name -contains "triggers") {
@@ -109,13 +118,16 @@ function Read-CecConnector {
             $crawlerConfig = $connector.content.crawler.$crawlerType
             if ($crawlerConfig.PSObject.Properties.Name -contains "extractors") {
                 $documents = $crawlerConfig.extractors.documents
-                $docIndex = 0
                 foreach ($doc in $documents) {
                     foreach ($tagger in $doc.taggers) {
-                        Read-Tagger -ConnectorPath $Path -DocumentExtractor $doc -Index $docIndex -Tagger $tagger
+                        Read-Tagger -ConnectorPath $Path -Tagger $tagger
                     }
+                }
 
-                    $docIndex++
+                if ($crawlerConfig.extractors.PSObject.Properties.Name -contains "locales") {
+                    foreach ($locale in $crawlerConfig.extractors.locales) {
+                        Read-LocaleExtractor -ConnectorPath $Path -LocaleObj $locale
+                    }
                 }
             }
 
@@ -135,6 +147,57 @@ function Read-CecConnector {
 
 $taggerSuffix = "`nmodule.exports = { extract };`n"
 
+function Write-InlineSourceFunction {
+    param(
+        $FilePath,
+        $Obj,
+        $Type
+    )
+
+    if ($Null -ne $Obj -and $Obj.PSObject.Properties.Name -contains "source" -and $Null -ne $Obj.source) {
+        $source = ($Obj.source).Replace("\r\n", "`n").Replace("\n", "`n")
+        if ($Type -eq "js") {
+            $source += $taggerSuffix
+        }
+
+        Set-Content -Value $source -Path $FilePath
+        $Obj.source = "<exported to ${fileName}>"
+    }
+}
+
+function Read-ExportedFilePath {
+    param(
+        $Obj,
+        $Value,
+        $BasePath
+    )
+
+    if (-not ($Value -match "\<exported to (.*?\.(js|http))\>")) {
+        return
+    }
+
+    $fileName = $Matches[1]
+    $fullPath = (Join-Path $BasePath $fileName)
+    if (Test-Path $fullPath) {
+        return $fullPath
+    }
+}
+
+function Read-InlineSourceFunction {
+    param(
+        $BasePath,
+        $Obj
+    )
+
+    if ($Null -eq $Obj -or $Obj.PSObject.Properties.Name -notcontains "source" -or $Null -eq $Obj.Source) {
+        return
+    }
+
+    $fullPath = Read-ExportedFilePath -BasePath $BasePath -Obj $Obj -Value $Obj.source
+    $result = (Get-Content $fullPath -Raw).Trim().Replace($taggerSuffix.Trim(), "").Replace("`r`n", "`n")
+    $Obj.source = $result
+}
+
 function Write-Tagger {
     param(
         $ConnectorPath,
@@ -147,28 +210,38 @@ function Write-Tagger {
     $tag = $Tagger.tag
     $fileName = "extractor_${Index}_${tag}.${type}"
     $taggerPath = (Join-Path $ConnectorPath $fileName)
-    if ($Null -ne $Tagger -and $Tagger.PSObject.Properties.Name -contains "source" -and $Null -ne $Tagger.Source) {
-        $source = ($Tagger.source).Replace("\r\n", "`n").Replace("\n", "`n") + $taggerSuffix
-        Set-Content -Value $source -Path $taggerPath
-        $tagger.source = "<exported to ${fileName}>"
-    }
+    Write-InlineSourceFunction -FilePath $taggerPath -Obj $Tagger -Type $type
 }
 
 function Read-Tagger {
     param(
         $ConnectorPath,
-        $Tagger,
-        $DocumentExtractor,
-        $Index
+        $Tagger
     )
 
-    $type = $DocumentExtractor.type
-    $tag = $Tagger.tag
-    $fileName = "extractor_${Index}_${tag}.${type}"
-    $taggerPath = (Join-Path $ConnectorPath $fileName)
-    if (Test-Path $taggerPath) {
-        $Tagger.source = (Get-Content $taggerPath -Raw).Trim().Replace($taggerSuffix.Trim(), "").Replace("`r`n", "`n")
-    }
+    Read-InlineSourceFunction -BasePath $ConnectorPath -Obj $Tagger
+}
+
+function Write-LocaleExtractor {
+    param(
+        $ConnectorPath,
+        $LocaleObj,
+        $Index,
+        $Type
+    )
+
+    $fileName = "locales_${Index}.${type}"
+    $filePath = (Join-Path $ConnectorPath $fileName)
+    Write-InlineSourceFunction -FilePath $filePath -Obj $LocaleObj -Type $Type
+}
+
+function Read-LocaleExtractor {
+    param(
+        $ConnectorPath,
+        $LocaleObj
+    )
+
+    Read-InlineSourceFunction -BasePath $ConnectorPath -Obj $LocaleObj
 }
 
 function Write-Trigger {
@@ -193,20 +266,22 @@ function Write-Trigger {
 
         if ($trigger.request.PSObject.Properties.Name -contains "headers") {
             $headers = $trigger.request.headers
-            foreach ($key in $headers.PSObject.Properties.Name) {
-                $values = $headers.$key
-                foreach ($value in $values) {
-                    $fileContent += "${key}: ${value}`n"
+            if ($Null -ne $headers -and @($headers.PSObject.Properties).Count -gt 0) {
+                foreach ($key in $headers.PSObject.Properties.Name) {
+                    $values = $headers.$key
+                    foreach ($value in $values) {
+                        $fileContent += "${key}: ${value}`n"
+                    }
                 }
             }
         }
 
-        if ($trigger.request.PSObject.Properties.name -contains "body") {
+        if ($trigger.request.PSObject.Properties.Name -contains "body") {
             $body = $trigger.request.body.Replace("\r\n", "`n").Replace("\n", "`n")
             $fileContent += "`n${body}"
         }
 
-        Set-Content -Path $filePath -Value $fileContent
+        Set-Content -Path $filePath -Value $fileContent.TrimEnd()
         $trigger.request = "<exported to ${fileName}>"
     }
     else {
@@ -229,8 +304,8 @@ function Read-Trigger {
     )
 
     $type = $Trigger.type
-    $filePath = Join-Path $ConnectorPath "${BaseKey}_${type}.http"
-    If (Test-Path $filePath) {
+    $filePath = Read-ExportedFilePath -BasePath $ConnectorPath -Obj $Trigger -Value $Trigger.$Type
+    If ($Null -ne $filePath -and (Test-Path $filePath)) {
         $body = ""
         $method = $Null
         $url = $Null

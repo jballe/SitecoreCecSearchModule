@@ -25,10 +25,10 @@ function Invoke-CecPasswordAuthentication {
     } | ConvertTo-Json
 
     $response = Invoke-RestMethod -Uri $url -ContentType application/json -Method POST -Body $body -UserAgent "SitecoreCecSearchModule"
-    if($response.PSObject.Properties.Name -contains "error-id") {
+    if ($response.PSObject.Properties.Name -contains "error-id") {
         throw  ("Error from login: {0} {1} ({2})" -f $response.type, $response.message, $response.code)
     }
-    if(-not $response.PSObject.Properties.Name -contains "redirectUrl") {
+    if (-not $response.PSObject.Properties.Name -contains "redirectUrl") {
         throw ("Unexpected login response:`n{0}" -f ($response | ConvertTo-Json -Depth 15))
     }
 
@@ -45,7 +45,7 @@ function Invoke-CecPasswordAuthentication {
 }
 
 function Set-CecRefreshToken {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         $RefreshToken
     )
@@ -65,7 +65,7 @@ function Invoke-RefreshAccessToken {
 }
 
 function New-CecAccessToken {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         $RefreshToken
     )
@@ -78,7 +78,7 @@ function New-CecAccessToken {
 }
 
 function Set-CecAccessToken {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         $AccessToken
     )
@@ -96,11 +96,18 @@ function Invoke-CecGlobalMethod {
 
     $tokenVar = Get-Variable -Name "CecAccessToken"
     $token = $tokenVar.Value
-    Invoke-RestMethod -Uri "${BaseUrl}${Path}" -Method $Method -Headers @{ Authorization = "Bearer ${token}" } -ContentType "application/json" -Body:$Body -UserAgent "SitecoreCecSearchModule"
+    $params = @{
+        Uri         = "${BaseUrl}${Path}"
+        Method      = $Method
+        Headers     = @{ Authorization = "Bearer ${token}" }
+        ContentType = "application/json"
+        UserAgent   = "SitecoreCecSearchModule"
+    }
+    Invoke-RestMethod @params -Body:$Body
 }
 
 function Set-CecDomainContext {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         $Id
     )
@@ -144,7 +151,7 @@ function Invoke-CecDomainMethod {
         Headers     = @{ Authorization = "Bearer ${token}" }
         UserAgent   = "SitecoreCecSearchModule"
         ContentType = "application/json"
-        #Proxy       = "http://127.0.0.1:8888"
+        #Proxy       = "http://127.0.0.1:8080"
     }
     if ($Null -ne $Body) {
         $params.Body = $Body | ConvertTo-Json -Depth 15

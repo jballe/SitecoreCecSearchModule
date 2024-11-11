@@ -35,6 +35,7 @@ function Add-CecSitemapQueryString {
 }
 
 function Remove-CecSitemapQueryString {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector,
         $QueryStringKey
@@ -114,6 +115,7 @@ function Add-CecCrawlerHeader {
 }
 
 function Remove-CecCrawlerHeader {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector,
         $HeaderKey
@@ -160,6 +162,7 @@ function Add-CecConnectorVercelBypassProtection {
 }
 
 function Remove-CecConnectorVercelBypassProtection {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Connector
     )

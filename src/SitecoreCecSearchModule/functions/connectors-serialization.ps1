@@ -167,7 +167,6 @@ function Write-InlineSourceFunction {
 
 function Read-ExportedFilePath {
     param(
-        $Obj,
         $Value,
         $BasePath
     )
@@ -193,7 +192,7 @@ function Read-InlineSourceFunction {
         return
     }
 
-    $fullPath = Read-ExportedFilePath -BasePath $BasePath -Obj $Obj -Value $Obj.source
+    $fullPath = Read-ExportedFilePath -BasePath $BasePath -Value $Obj.source
     $result = (Get-Content $fullPath -Raw).Trim().Replace($taggerSuffix.Trim(), "").Replace("`r`n", "`n")
     $Obj.source = $result
 }
@@ -304,7 +303,7 @@ function Read-Trigger {
     )
 
     $type = $Trigger.type
-    $filePath = Read-ExportedFilePath -BasePath $ConnectorPath -Obj $Trigger -Value $Trigger.$Type
+    $filePath = Read-ExportedFilePath -BasePath $ConnectorPath -Value $Trigger.$Type
     If ($Null -ne $filePath -and (Test-Path $filePath)) {
         $body = ""
         $method = $Null

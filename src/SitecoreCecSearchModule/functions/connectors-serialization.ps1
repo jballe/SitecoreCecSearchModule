@@ -133,10 +133,8 @@ function Read-CecConnector {
 
             if ($crawlerConfig.PSObject.Properties.Name -contains "triggers") {
                 $triggers = $crawlerConfig.triggers
-                $triggerIndex = 0
                 foreach ($trigger in $triggers) {
-                    Read-Trigger -ConnectorPath $Path -BaseKey "trigger_${triggerIndex}" -Trigger $trigger
-                    $triggerIndex++
+                    Read-Trigger -ConnectorPath $Path -Trigger $trigger
                 }
             }
         }
@@ -298,7 +296,6 @@ function Write-Trigger {
 function Read-Trigger {
     param(
         $ConnectorPath,
-        $BaseKey,
         $Trigger
     )
 

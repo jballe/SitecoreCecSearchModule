@@ -1,16 +1,19 @@
-$defaultRequestArguments = @{
+New-Variable -Name ClientDefaultProperties -Scope Global -Force -Value @{
     UserAgent            = "SitecoreCecSearchModule"
     #Verbose              = $true
     #Proxy                = "http://127.0.0.1:8080"
     #SkipCertificateCheck = $true
 }
 
-function Set-CecClientRequestArguments {
+function Set-CecClientDefaultProperties {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function')]
     param(
-        [hashtable] $Arguments
+        [hashtable] $Value
     )
-    $global:defaultRequestArguments = $Arguments
+
+    Set-Variable -Scope Global -Name ClientDefaultProperties -Value $Value | Out-Null
 }
 
 function Invoke-CecLogin {
@@ -19,7 +22,7 @@ function Invoke-CecLogin {
         [String] $Email,
         [String] $Password
     )
-    
+
     Invoke-CecPasswordAuthentication -Email $Email -Password $Password
     Invoke-RefreshAccessToken
 }
@@ -33,11 +36,12 @@ function Invoke-CecPortalAuthentication {
         $TenantId = "9e276386-a70c-4cc6-e5e7-08dda91b30c7"
     )
     $ErrorActionPreference = "STOP"
+    $defaultRequestArguments = (Get-Variable -Scope Global -Name ClientDefaultProperties).Value
 
     Invoke-WebRequest -SessionVariable "CecLoginSession" -Uri "https://cec.sitecorecloud.io"  -Method GET -UseBasicParsing @defaultRequestArguments | Out-Null
     $response = Invoke-WebRequest -WebSession $CecLoginSession -Uri "https://account.sitecorecloud.io/login/?redirect=https%3A%2F%2Fcec.sitecorecloud.io&scope=%5B%22portal%22%2C%22search-rec%22%2C%22admin%22%2C%22internal%22%2C%22util%22%2C%22discover%22%2C%22event%22%2C%22ingestion%22%5D"  -Method GET -UseBasicParsing @defaultRequestArguments
     # Fetch chuncks
-    Write-Host "Request account script bundles to find IDP definitions..."
+    Write-Information "Requesting account script bundles to find IDP definitions..."
     $idpDefinition = ([regex]"`"(/_next/[^`"]+.js)`"").Matches($response.Content) | ForEach-Object { 
         $url = "https://account.sitecorecloud.io$($_.Groups[1].Value)"
         $content = Invoke-RestMethod -Uri $url @defaultRequestArguments
@@ -49,7 +53,7 @@ function Invoke-CecPortalAuthentication {
     if($null -eq $idpDefinition) {
         throw "Could not find IDP definition in the response, please check the login URL or the response content."
     } else {
-        Write-Host "Found IDP definition for  $($idpDefinition.authorizeUrl)"
+        Write-Information "Found IDP definition for  $($idpDefinition.authorizeUrl)"
     }
 
     $verifier = "kPvs5iL6Nl6YhM_-9U2N6lE4fvOquDAtI6FPbt5Dvp4" # This is random bytes converted with base64, removed =, changed + to - and / to _
@@ -116,6 +120,7 @@ function Invoke-CecPortalAuthentication {
 }
 
 function New-FormResponseData {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     param(
         $Response,
         $Values = @{}
@@ -147,6 +152,7 @@ function Invoke-CecPasswordAuthentication {
         [String] $Password
     )
     $ErrorActionPreference = "STOP"
+    $defaultRequestArguments = (Get-Variable -Scope Global -Name ClientDefaultProperties).Value
 
     $url = "https://discover.sitecorecloud.io/account/1/authenticate/password/cec"
     $body = @{
@@ -202,7 +208,9 @@ function New-CecAccessToken {
         $RefreshToken
     )
 
+    $defaultRequestArguments = (Get-Variable -Scope Global -Name ClientDefaultProperties).Variable
     $url = "https://discover.sitecorecloud.io/account/1/access-token"
+
     $response = Invoke-RestMethod -Method PUT -Uri $url -Headers @{ Authorization = "Bearer ${RefreshToken}" } -ContentType application/json @defaultRequestArguments
     $accessToken = $response.accessToken
     Set-CecAccessToken -AccessToken $accessToken
@@ -226,8 +234,10 @@ function Invoke-CecGlobalMethod {
         [object]$Body
     )
 
+    $defaultRequestArguments = (Get-Variable -Scope Global -Name ClientDefaultProperties).Value
     $tokenVar = Get-Variable -Name "CecAccessToken"
     $token = $tokenVar.Value
+
     $params = @{
         Uri         = "${BaseUrl}${Path}"
         Method      = $Method
@@ -258,12 +268,12 @@ function Invoke-CecDomainMethod {
         [string]$DomainScope = "portal",
         [string]$Version = "v1",
         [string]$BaseUrl = "https://discover.sitecorecloud.io",
-        [string]$FullPath = $Null,
-        [switch]$SkipHttpErrorCheck
+        [string]$FullPath = $Null
     )
 
     $token = (Get-Variable -Name "CecAccessToken").Value
     $domain = (Get-Variable -Name "CecDomainContext").Value
+    $defaultRequestArguments = (Get-Variable -Scope Global -Name ClientDefaultProperties).Value
 
     if ($Null -eq $token) { Write-Error "Missing required login, please run Invoke-CecLogin"; throw; }
     if ($Null -eq $domain) { Write-Error "Missing required domain context, please set context with Set-CecDomainContext"; throw; }

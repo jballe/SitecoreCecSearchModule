@@ -19,7 +19,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.full_version }}
       version_primary: ${{ steps.version.outputs.version }}
-      version_prerelease: ${{ steps.version.outputs.prerelease }}
+      version_prerelease: ${{ steps.version.outputs.NuGetPreReleaseTag }}
       is_prerelease: ${{ steps.version.outputs.is_prerelease }}
     steps:
     - uses: actions/checkout@v4

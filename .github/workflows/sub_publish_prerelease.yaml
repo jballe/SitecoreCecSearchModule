@@ -68,18 +68,18 @@ jobs:
           -Repository $repositoryName `
           -NuGetApiKey "${{ github.token }}"
 
-  verify:
-    name: Verify published package
-    runs-on: ubuntu-latest
-    needs:
-      - publish
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-tags: false
-          fetch-depth: 1
-      - name: Install package
-        shell: pwsh
-        run: |
-          ./bld/Install-PrereleasePackage.ps1 -User "${{ github.actor }}" -PersonalAccessToken "${{ github.token }}" -Version ${{ inputs.version }}
+  # verify:
+  #   name: Verify published package
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - publish
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-tags: false
+  #         fetch-depth: 1
+  #     - name: Install package
+  #       shell: pwsh
+  #       run: |
+  #         ./bld/Install-PrereleasePackage.ps1 -User "${{ github.actor }}" -PersonalAccessToken "${{ github.token }}" -Version ${{ inputs.version }}

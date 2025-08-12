@@ -16,6 +16,11 @@ The purpose of this module is to
 
 Module is available in [Powershell Gallery](https://www.powershellgallery.com/packages/SitecoreCecSearchModule/)
 
+```powershell
+Install-Module -Name SitecoreCecSearchModule
+Import-Module -Name SitecoreCecSearchModule
+```
+
 ## Authentication
 
 When using username and password for CEC, you can use the same here:
@@ -33,7 +38,11 @@ Invoke-CecPortalAuthentication -Email $Email -Password $Password
 When you have access to multiple organizations and/or tenants (such as prod and non-prod) you will need to specify those. The ids can be found from the links when choosing in the portal
 
 ```powershell
- Invoke-CecPortalAuthentication -Email $Email -Password $Password -OrganizationId "org_XXXXXXXXXXXXXXXX" -TenantId "00000000-0000-0000-0000-000000000000" -Verbose
+ Invoke-CecPortalAuthentication `
+    -Email $Email `
+    -Password $Password `
+    -OrganizationId "org_XXXXXXXXXXXXXXXX" `
+    -TenantId "00000000-0000-0000-0000-000000000000"
 ```
 
 When using Single-Sign-On with OIDC provider or TOTP, it is a bit more complicated and there is no direct implementation to support this.
@@ -42,6 +51,18 @@ When authenticated manually in the portal, you have a valid Bearer token and you
 ```powershell
 Set-CecAccessToken $BearerTokenValueWithoutBearerPrefix
 ```
+
+## Configuration
+
+All requests to CEC is within the context of a domain that needs to be included with all requests. This value needs to be specified and will then be included by the module in the following requests.
+
+The most simple approach is to just request the list of domains and assign it as context
+
+```powershell
+Get-CecDomain | Set-CecDomainContext
+```
+
+If you know the id you can specify it directly (and hereby save a request) or use `Set-CecDomainContextBy` to fetch and filter the list of available domains
 
 ## Actions
 

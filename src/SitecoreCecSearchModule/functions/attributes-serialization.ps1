@@ -1,4 +1,40 @@
-﻿function Write-CecAttribute {
+﻿function Write-CecEntity {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]$Entities,
+        [Parameter(Mandatory)][String]$Path,
+
+        # Don't split into individual files, just write a single file
+        [Switch]$SkipFiles,
+
+        [Switch]$Force
+    )
+
+    begin {
+        If (-not (Test-Path $Path -PathType Container)) {
+            New-item $Path -ItemType Directory | Out-Null
+        }
+    }
+
+    process {
+
+        if ($SkipFiles) {
+            if ($Force -or $PSCmdlet.ShouldProcess($Path, 'Write attributes to disk')) {
+                Set-Content -Path (Join-Path $Path "attributes.json") -Value (ConvertTo-Json -InputObject $Attributes -Depth 30)
+            }
+            return
+        }
+
+        $names = $Entities.PSObject.Properties.Name
+        foreach($entityName in $names) {
+            $folderPath = Join-Path $Path $entityName
+            $attributes = $Entities.$entityName
+            Write-CecAttribute -Attributes $attributes -Path $folderPath -SkipFiles:$SkipFiles -Force:$Force
+        }
+    }
+}
+
+function Write-CecAttribute {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Attributes,

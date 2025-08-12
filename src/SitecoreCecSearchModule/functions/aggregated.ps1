@@ -12,7 +12,7 @@ function Invoke-GetAndWriteAllCecConfiguration {
         [Switch]$SkipConnectorReplacement
     )
 
-    Get-CecAttribute | Write-CecAttribute -Path $Path -Force
+    Get-CecEntity | Write-CecEntity -Path (Join-Path $Path "entities") -Force
 
     if ("${EnvToken}" -ne "" -and "${Suffix}" -eq "" -and "${Prefix}" -eq "" -and "${TextToken}" -eq "" -and "${ScriptToken}" -eq "") {
         $Suffix = "_${EnvToken}"
@@ -35,5 +35,7 @@ function Invoke-GetAndWriteAllCecConfiguration {
     Get-CecWidgetInfo | Get-CecWidget | Write-CecWidget -Path $Path -Subfolder -Clean
 
     Get-CecKeywordInfo | Write-CecKeywordInfo -Path $Path -Subfolder -Clean
+
+    Write-Output "Cec configuration written to $(Resolve-Path $Path)"
 }
 

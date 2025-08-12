@@ -171,7 +171,7 @@ function Start-CecConnectorRescan {
 
         $urlPath = "/microservices/job-orchestrator/jobs"
         if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
-            $result = Invoke-CecDomainMethod -Path $urlPath -Method POST -Body $body -SkipHttpErrorCheck
+            $result = Invoke-CecDomainMethod -Path $urlPath -Method POST -Body $body
             if($result.PSObject.Properties.Name.Contains("message")) {
                 $data = $result
                 $result = $result.data.runningJob

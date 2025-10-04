@@ -4,11 +4,11 @@ on:
   workflow_call:
     outputs:
       version:
-        value: ${{ jobs.build.outputs.version }}
+        value: '${{ jobs.build.outputs.version }}'
       version_primary: 
-        value: ${{ jobs.build.outputs.version_primary }}
+        value: '${{ jobs.build.outputs.version_primary }}'
       version_prerelease:
-        value: ${{ jobs.build.outputs.version_prerelease }}
+        value: '${{ jobs.build.outputs.version_prerelease }}'
       is_prerelease:
         value: ${{ jobs.build.outputs.is_prerelease }}
 

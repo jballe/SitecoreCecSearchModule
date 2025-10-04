@@ -29,6 +29,15 @@ jobs:
     - name: Update version
       shell: pwsh
       run: |
+        If("${fullVersion}" -eq "") {
+          dir env:
+          Write-Host "input:"
+          Write-Host "  version: ${{ inputs.version }}"
+          Write-Host "  version_primary: ${{ inputs.version_primary }}"
+          Write-Host "  version_prerelease: ${{ inputs.version_prerelease }}"
+          Write-Error "Something is wrong, fullVersion is empty"
+        }
+
         $versionParams = @{
           Path = "./src/SitecoreCecSearchModule/SitecoreCecSearchModule.psd1"
           ModuleVersion = "${{ inputs.version_primary }}"

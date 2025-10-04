@@ -60,6 +60,9 @@ jobs:
         NUGETKEY: ${{ secrets.NUGET_APIKEY }}
       run: |
         Install-Module Microsoft.PowerShell.PSResourceGet -Repository PSGallery -Force
+
+        Get-PSResourceRepository
+        
         Publish-PSResource -path ./src/SitecoreCecSearchModule -Repository PSGallery -APIKey "${env:NUGETKEY}" -Verbose
 
   verify:

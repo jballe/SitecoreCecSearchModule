@@ -33,6 +33,7 @@ jobs:
     - name: Update version
       shell: pwsh
       run: |
+        $fullVersion = "${{ inputs.version }}"
         If("${fullVersion}" -eq "") {
           dir env:
           Write-Host "input:"

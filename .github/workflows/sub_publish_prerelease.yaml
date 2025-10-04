@@ -29,7 +29,8 @@ jobs:
     - name: Update version
       shell: pwsh
       run: |
-        If("${fullVersion}" -eq "") {
+        $fullVersion = "${{ inputs.version }}"
+        If($fullVersion -eq "") {
           dir env:
           Write-Host "input:"
           Write-Host "  version: ${{ inputs.version }}"

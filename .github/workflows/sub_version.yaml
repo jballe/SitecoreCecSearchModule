@@ -19,7 +19,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.full_version }}
       version_primary: ${{ steps.version.outputs.version }}
-      version_prerelease: ${{ steps.version.outputs.NuGetPreReleaseTag }}
+      version_prerelease: ${{ steps.version.outputs.prerelease }}
       is_prerelease: ${{ steps.version.outputs.is_prerelease }}
     steps:
     - uses: actions/checkout@v4
@@ -55,10 +55,12 @@ jobs:
         # }
 
         $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"
+        $isPrerelease = "${prerelease}" -ne ""
 
+        echo ("full_version={0}" -f $fullversion) >> "$env:GITHUB_OUTPUT"
         echo ("version={0}" -f $version) >> "$env:GITHUB_OUTPUT"
         echo ("prerelease={0}" -f $prerelease) >> "$env:GITHUB_OUTPUT"
-        echo ("full_version={0}" -f $fullversion) >> "$env:GITHUB_OUTPUT"
+        echo ("is_prerelease={0}" -f $isPrerelease) >> "$env:GITHUB_OUTPUT"
 
     - name: Update version
       shell: pwsh

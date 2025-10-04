@@ -42,7 +42,7 @@ function Remove-CecSitemapQueryString {
     )
 
     process {
-        if ($Connector.content.crawler.PSObject.Properties.Name -contains "webCrawlerConfig") {
+        if ($Connector.content.PSObject.Properties.Name -contains "crawler" -and $Connector.content.crawler.PSObject.Properties.Name -contains "webCrawlerConfig") {
             foreach ($trigger in $Connector.content.crawler.webCrawlerConfig.triggers) {
                 if ($trigger.PSObject.Properties.Name -notcontains "sitemap" -or $trigger.sitemap.PSObject.Properties.Name -notcontains "urls") {
                     continue
@@ -123,10 +123,10 @@ function Remove-CecCrawlerHeader {
 
     process {
         $requestObjs = $Null
-        if ($Connector.content.crawler.PSObject.Properties.Name -contains "webCrawlerConfig") {
+        if ($Connector.content.PSObject.Properties.Name -contains "crawler" -and $Connector.content.crawler.PSObject.Properties.Name -contains "webCrawlerConfig") {
             $requestObjs = @($Connector.content.crawler.webCrawlerConfig)
         }
-        elseif ($Connector.content.crawler.PSObject.Properties.Name -contains "apiCrawlerConfig" -and $Connector.content.crawler.apiCrawlerConfig.PSObject.Properties.Name -contains "triggers") {
+        elseif ($Connector.content.PSObject.Properties.Name -contains "crawler" -and $Connector.content.crawler.PSObject.Properties.Name -contains "apiCrawlerConfig" -and $Connector.content.crawler.apiCrawlerConfig.PSObject.Properties.Name -contains "triggers") {
             $requestObjs = $Connector.content.crawler.apiCrawlerConfig.triggers | Select-Object -ExpandProperty "request"
         }
 

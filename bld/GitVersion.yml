@@ -2,4 +2,9 @@ mode: ContinuousDelivery
 branches:
   main:
     regex: main
-    tag: rc
+    label: rc
+  develop:
+    regex: develop
+    label: beta
+  pull-request:
+    label: alphapr{Number} 

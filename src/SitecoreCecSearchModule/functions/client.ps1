@@ -1,5 +1,5 @@
 New-Variable -Name ClientDefaultProperties -Scope Global -Force -Value @{
-    UserAgent            = "SitecoreCecSearchModule"
+    UserAgent = "SitecoreCecSearchModule"
     #Verbose              = $true
     #Proxy                = "http://127.0.0.1:8080"
     #SkipCertificateCheck = $true
@@ -89,7 +89,9 @@ function Set-CecDomainContext {
         $Id
     )
 
-    Set-Variable -Name "CecDomainContext" -Value $Id -Scope Script
+    process {
+        Set-Variable -Name "CecDomainContext" -Value $Id -Scope Script
+    }
 }
 
 function Get-CecDomainContext {

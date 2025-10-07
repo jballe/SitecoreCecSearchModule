@@ -40,8 +40,8 @@ jobs:
     secrets: inherit
 
   publish_rc:
-    name: Rc
-    if: startsWith(github.ref, 'refs/tags/v') == false && ${{ github.ref }} == 'refs/tags/main'
+    name: RC
+    if: startsWith(github.ref, 'refs/tags/v') == false && github.ref == 'refs/tags/main'
     needs:
       - build
       - verify

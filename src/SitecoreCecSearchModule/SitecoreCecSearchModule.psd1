@@ -108,6 +108,9 @@
     'Set-CecAttribute',
     'Write-CecAttribute',
     'Read-CecAttribute',
+    'Get-CecSpec',
+    'Get-CecEntity',
+    'Write-CecEntity',
 
     'Get-CecFeatureConfig',
     'Write-CecFeatureConfig',
@@ -122,7 +125,11 @@
     'Get-CecEndpoint',
     'Get-CecApiKeys',
 
+    'Get-CecKeywordInfo',
+    'Write-CecKeywordInfo',
+
     'Invoke-GetAndWriteAllCecConfiguration',
+    'Invoke-GetAndWriteCecConnectorConfiguration',
 
     'Convert-HttpJsonToGraph',
     'Convert-HttpGraphToJson'

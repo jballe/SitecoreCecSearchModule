@@ -1,4 +1,4 @@
-mode: ContinuousDelivery
+mode: ContinuousDeployment
 branches:
   main:
     regex: main
@@ -8,3 +8,5 @@ branches:
     tag: beta
   pull-request:
     tag: alphapr{Number} 
+  feature:
+    tag: alpha{BranchName}

@@ -15,11 +15,11 @@ function Remove-Suffix {
         [string]$Suffix
     )
 
-    if ("${Prefix}" -ne "" -and $Value.StartsWith($Prefix)) {
+    if ("${Prefix}" -ne "" -and $Value -ilike "${Prefix}*") {
         $Value = $Value.Substring($Prefix.Length)
     }
 
-    if ("${Suffix}" -ne "" -and $Value.EndsWith($Suffix)) {
+    if ("${Suffix}" -ne "" -and $Value -ilike "*${Suffix}") {
         $Value = $Value.Substring(0, $Value.Length - $Suffix.Length)
     }
 

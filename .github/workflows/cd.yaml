@@ -27,7 +27,7 @@ jobs:
     needs:
       - build
       - verify
-    uses: ./.github/workflows/sub_publish_release.yaml
+    uses: ./.github/workflows/sub_publish_psgallery.yaml
     with:
       version: ${{ needs.build.outputs.version }}
       version_primary: ${{ needs.build.outputs.version_primary }}

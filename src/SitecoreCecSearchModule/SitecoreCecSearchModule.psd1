@@ -104,6 +104,8 @@
     'Get-CecJobStatus',
     'Get-CecJobError',
 
+    'Get-CecEntityConfig',
+    'Write-CecEntityConfig',
     'Get-CecAttribute',
     'Set-CecAttribute',
     'Write-CecAttribute',

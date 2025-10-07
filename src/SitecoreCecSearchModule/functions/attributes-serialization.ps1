@@ -1,4 +1,26 @@
-﻿function Write-CecEntity {
+﻿function Write-CecEntityConfig {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)][Array]$Entities,
+        [Parameter(Mandatory)][String]$Path,
+
+        [Switch]$Force
+    )
+
+    begin {
+        If (-not (Test-Path $Path -PathType Container)) {
+            New-item $Path -ItemType Directory | Out-Null
+        }
+    }
+
+    process {
+        if ($Force -or $PSCmdlet.ShouldProcess($Path, 'Write entities config to disk')) {
+            Set-Content -Path (Join-Path $Path "entities.json") -Value (ConvertTo-Json -InputObject $Entities -Depth 30)
+        }
+    }
+}
+
+function Write-CecEntity {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]$Entities,

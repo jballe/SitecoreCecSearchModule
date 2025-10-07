@@ -1,8 +1,33 @@
 $specsRequestPath = "/microservices/common-editor/configs/current/specs"
+$configRequestPath = "/microservices/common-editor/configs/current"
 
 function Get-CecSpec {
     (Invoke-CecDomainMethod -Method GET -Path $specsRequestPath).productSpecs
+}
 
+function Get-CecEntityConfig {
+    param(
+        [string]$EntityName = $Null,
+        [string]$Prefix = $Null,
+        [string]$Suffix = $Null,
+        [switch]$RemovePrefix
+    )
+
+    [Array]$entities = (Invoke-CecDomainMethod -Method GET -Path $configRequestPath).domainConfig.entities
+
+    if("" -ne "${Prefix}" -or "" -ne "${Suffix}") {
+        $entities = $entities | Where-Object { $_.name -ilike "${Prefix}*${Suffix}" }
+    }
+
+    if($RemovePrefix -and ("" -ne "${Prefix}" -or "" -ne "${Suffix}")) {
+        $entities | ForEach-Object {
+            $obj = $_
+            $obj.displayName = (Remove-Suffix -Value $obj.displayName -Prefix $Prefix -Suffix $Suffix).Trim()
+            $obj.name = (Remove-Suffix -Value $obj.name -Prefix $Prefix -Suffix $Suffix)
+        }
+    }
+
+    $entities
 }
 
 function Get-CecEntity {
@@ -16,7 +41,7 @@ function Get-CecEntity {
     $entities = (Invoke-CecDomainMethod -Method GET -Path $specsRequestPath).productSpecs.attributesV2
 
     if ("" -ne "${EntityName}") {
-        $name = "${Prefix}${EntityName}"
+        $name = "${Prefix}${EntityName}${Suffix}"
         if ($entities.PSObject.Properties.Name -notcontains $name) {
             return $Null
         } else {

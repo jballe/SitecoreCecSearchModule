@@ -12,6 +12,7 @@ function Invoke-GetAndWriteAllCecConfiguration {
         [Switch]$SkipConnectorReplacement
     )
 
+    Get-CecEntityConfig | Write-CecEntityConfig -Path (Join-Path $Path "entities") -Force
     Get-CecEntity | Write-CecEntity -Path (Join-Path $Path "entities") -Force
 
     Invoke-GetAndWriteCecConnectorConfiguration -Path:$Path -EnvToken:$EnvToken -Suffix:$Suffix -Prefix:$Prefix -TextToken:$TextToken -ScriptToken:$ScriptToken -Domains:$Domains -SkipConnectorReplacement:$SkipConnectorReplacement

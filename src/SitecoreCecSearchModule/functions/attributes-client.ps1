@@ -7,10 +7,39 @@ function Get-CecSpec {
 
 function Get-CecEntity {
     param(
-        [string]$EntityName = $Null
+        [string]$EntityName = $Null,
+        [string]$Prefix = $Null,
+        [string]$Suffix = $Null,
+        [switch]$RemovePrefix
     )
 
     $entities = (Invoke-CecDomainMethod -Method GET -Path $specsRequestPath).productSpecs.attributesV2
+
+    if ("" -ne "${EntityName}") {
+        $name = "${Prefix}${EntityName}"
+        if ($entities.PSObject.Properties.Name -notcontains $name) {
+            return $Null
+        } else {
+            return $entities.$name
+        }
+    }
+
+    if("" -ne "${Prefix}" -or "" -ne "${Suffix}") {
+        $result = [PSCustomObject]@{}
+        $names = $entities.PSObject.Properties.Name | Where-Object { $_ -ilike "${Prefix}*${Suffix}"}
+        foreach ($name in $names) {
+            $newName = $name
+            if($RemovePrefix) {
+                $newName = Remove-Suffix -Value $newName -Prefix $Prefix -Suffix $Suffix
+            }
+
+            $obj = $entities.$name
+            #$result[$newName] = $obj
+            $result | AddOrSetPropertyValue -PropertyName $newName -Value $obj
+        }
+
+        return $result
+    }
 
     if ("" -eq "${EntityName}") {
         return $entities

@@ -28,11 +28,24 @@ jobs:
 
   publish_beta:
     name: Prerelease
-    if: startsWith(github.ref, 'refs/tags/v') == false
+    if: startsWith(github.ref, 'refs/tags/v') == false && ${{ github.ref }} != 'refs/tags/main'
     needs:
       - build
       - verify
-    uses: ./.github/workflows/sub_publish_prerelease.yaml
+    uses: ./.github/workflows/sub_publish_ghregistry.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      version_primary: ${{ needs.build.outputs.version_primary }}
+      version_prerelease: ${{ needs.build.outputs.version_prerelease }}
+    secrets: inherit
+
+  publish_rc:
+    name: Rc
+    if: startsWith(github.ref, 'refs/tags/v') == false && ${{ github.ref }} == 'refs/tags/main'
+    needs:
+      - build
+      - verify
+    uses: ./.github/workflows/sub_publish_psgallery.yaml
     with:
       version: ${{ needs.build.outputs.version }}
       version_primary: ${{ needs.build.outputs.version_primary }}

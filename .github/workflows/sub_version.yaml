@@ -44,6 +44,9 @@ jobs:
         $version = $versions.MajorMinorPatch
         $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
         $branch = $versions.PreReleaseLabel
+        if("" -ne "${prerelease}") {
+          $prerelease += $versions.CommitsSinceVersionSourcePadded
+        }
 
         $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"
         $isPrerelease = "${prerelease}" -ne ""

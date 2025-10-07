@@ -37,7 +37,7 @@ jobs:
       shell: pwsh
       id: version
       run: |
-        $versions = dotnet-gitversion /config $GITHUB_WORKSPACE/bld/GitVersion.yml /output json | Out-String | ConvertFrom-Json
+        $versions = dotnet-gitversion /config ./bld/GitVersion.yml /output json | Out-String | ConvertFrom-Json
         Write-Host "GitVersion output"
         $versions
 

@@ -15,6 +15,11 @@ function Get-CecEntityConfig {
 
     [Array]$entities = (Invoke-CecDomainMethod -Method GET -Path $configRequestPath).domainConfig.entities
 
+    if("" -ne "${EntityName}") {
+        $entities = $entities | Where-Object { $_.name -ilike "${Prefix}${EntityName}${Suffix}" }
+    }
+
+
     if("" -ne "${Prefix}" -or "" -ne "${Suffix}") {
         $entities = $entities | Where-Object { $_.name -ilike "${Prefix}*${Suffix}" }
     }

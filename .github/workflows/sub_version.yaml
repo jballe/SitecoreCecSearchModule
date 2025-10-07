@@ -33,6 +33,7 @@ jobs:
         dotnet tool install --global GitVersion.Tool --version 5.*
 
     - name: Calculate version
+      continue-on-error: false
       shell: pwsh
       id: version
       run: |

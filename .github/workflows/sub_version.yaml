@@ -45,15 +45,6 @@ jobs:
         $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
         $branch = $versions.PreReleaseLabel
 
-        # If("${{github.ref_name }}" -match "refs/pull/([0-9]+)/merge") {
-        #   $pr = $Matches[1]
-        #   $prerelease = "alpha${pr}pr${no}"
-        # } ElseIf("${{ github.ref }}" -ne "refs/heads/main" -and "${{ github.ref }}" -notlike "refs/tags/v*") {
-        #   $prerelease = "beta${branch}${no}"
-        # } ElseIf ("${{ github.ref }}" -eq "refs/heads/main" -and "${{ github.ref_type}}" -ne "tag") {
-        #   $prerelease = "rc${no}"
-        # }
-
         $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"
         $isPrerelease = "${prerelease}" -ne ""
 

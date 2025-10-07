@@ -50,4 +50,5 @@ jobs:
       version: ${{ needs.build.outputs.version }}
       version_primary: ${{ needs.build.outputs.version_primary }}
       version_prerelease: ${{ needs.build.outputs.version_prerelease }}
+      environment_name: psgallery_release
     secrets: inherit

@@ -105,7 +105,11 @@
     'Get-CecJobError',
 
     'Get-CecEntityConfig',
+    'Set-CecEntityConfig',
     'Write-CecEntityConfig',
+    'Read-CecEntityConfig',
+    'Publish-CecEntityConfig',
+    'Remove-CecEntityConfigDraft',
     'Get-CecAttribute',
     'Set-CecAttribute',
     'Write-CecAttribute',
@@ -134,7 +138,8 @@
     'Invoke-GetAndWriteCecConnectorConfiguration',
 
     'Convert-HttpJsonToGraph',
-    'Convert-HttpGraphToJson'
+    'Convert-HttpGraphToJson',
+    'Set-CecClientDefaultProperties'
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = @()

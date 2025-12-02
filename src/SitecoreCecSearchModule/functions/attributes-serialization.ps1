@@ -20,6 +20,18 @@
     }
 }
 
+function Read-CecEntityConfig {
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]
+        $Path
+    )
+
+    [Array]$config = Get-Content -Path (Join-Path $Path "entities.json") | ConvertFrom-Json
+
+    $config
+
+}
+
 function Write-CecEntity {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(

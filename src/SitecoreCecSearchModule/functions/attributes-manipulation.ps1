@@ -7,10 +7,12 @@
         [string]$Suffix = $Null
     )
 
-    $Entity.displayName = Add-SuffixTemplate -Value $Entity.displayName -Prefix $Prefix -Suffix $Suffix
-    $Entity.name = Add-SuffixTemplate -Value $Entity.name -Prefix "${Prefix}".ToLower() -Suffix "${Suffix}".ToLower()
+    process {
+        $Entity.displayName = Add-SuffixTemplate -Value $Entity.displayName -Prefix $Prefix -Suffix $Suffix
+        $Entity.name = Add-SuffixTemplate -Value $Entity.name -Prefix "${Prefix}".ToLower() -Suffix "${Suffix}".ToLower()
 
-    $Entity
+        $Entity
+    }
 }
 
 function Set-CecEntityConfigSuffixValue {
@@ -22,8 +24,11 @@ function Set-CecEntityConfigSuffixValue {
         [string]$Suffix = $Null
     )
 
-    $Entity.displayName = Set-SuffixTemplateValues -Value $Entity.displayName -Prefix $Prefix -Suffix $Suffix
-    $Entity.name = Set-SuffixTemplateValues -Value $Entity.name -Prefix "${Prefix}".ToLower() -Suffix "${Suffix}".ToLower()
+    process {
 
-    $Entity
+        $Entity.displayName = Set-SuffixTemplateValues -Value $Entity.displayName -Prefix $Prefix -Suffix $Suffix
+        $Entity.name = Set-SuffixTemplateValues -Value $Entity.name -Prefix "${Prefix}".ToLower() -Suffix "${Suffix}".ToLower()
+
+        $Entity
+    }
 }

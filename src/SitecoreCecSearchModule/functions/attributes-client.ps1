@@ -57,17 +57,19 @@ function Set-CecEntityConfig {
         }
     }
 
-    $doc.domainConfig.version += 1
-    $doc.domainConfig.updatedAt = ([long](Get-Date -AsUTC -UFormat "%s")) * 1000
-    $doc.domainConfig | AddOrSetPropertyValue -PropertyName "status" -Value "draft"
-    $doc.domainConfig | AddOrSetPropertyValue -PropertyName "operation" -Value "UPDATE"
     $doc.domainConfig.PSObject.Properties.Remove("createdAt")
     $doc.domainConfig.PSObject.Properties.Remove("live")
+    if ($doc.domainConfig.status -ne "draft") {
+        $doc.domainConfig.version += 1
+        $doc.domainConfig | AddOrSetPropertyValue -PropertyName "status" -Value "draft"
+    }
+    $doc.domainConfig.updatedAt = ([long](Get-Date -AsUTC -UFormat "%s")) * 1000
+    $doc.domainConfig | AddOrSetPropertyValue -PropertyName "operation" -Value "UPDATE"
 
     if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
 
         $response = (Invoke-CecDomainMethod -Method PUT -Path $configRequestPath -Body ($doc.domainConfig)) | Select-Object -ExpandProperty "domainConfig"
-        if($Publish) {
+        if ($Publish) {
             $response = Publish-CecEntityConfig
         }
 

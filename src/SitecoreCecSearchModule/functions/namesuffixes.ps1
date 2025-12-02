@@ -30,15 +30,21 @@ function Add-Suffix {
     Param(
         [string]$Value,
         [string]$Prefix,
-        [string]$Suffix
+        [string]$Suffix,
+        [switch]$AddSpace
     )
 
+    $spacer = ""
+    if($AddSpace) {
+        $spacer = " "
+    }
+
     if ("${Prefix}" -ne "") {
-        $Value = $Prefix + $Value
+        $Value = $Prefix + $spacer + $Value
     }
 
     if ("${Suffix}" -ne "") {
-        $Value = $Value + $Suffix
+        $Value = $Value + $spacer + $Suffix
     }
 
     $Value
@@ -52,13 +58,25 @@ function Add-SuffixTemplate {
     )
 
     if ("${Prefix}" -ne "" -and $Value.StartsWith($Prefix)) {
-        $Value = "{Prefix}_" + $Value.Substring($Prefix.Length)
+        $Value = "{Prefix}" + $Value.Substring($Prefix.Length)
     }
 
     if ("${Suffix}" -ne "" -and $Value.EndsWith($Suffix)) {
-        $Value = $Value.Substring(0, $Value.Length - $Suffix.Length) + "_{Suffix}"
+        $Value = $Value.Substring(0, $Value.Length - $Suffix.Length) + "{Suffix}"
     }
 
     $Value
+}
 
+function Set-SuffixTemplateValues {
+    Param(
+        [Parameter(ValueFromPipeline, Mandatory)]
+        [string]$Value,
+        [string]$Prefix,
+        [string]$Suffix
+    )
+
+    $Value = $Value.Replace("{Prefix}", $Prefix).Replace("{Suffix}", $Suffix)
+
+    $Value
 }

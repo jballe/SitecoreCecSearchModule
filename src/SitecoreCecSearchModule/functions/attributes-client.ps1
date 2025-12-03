@@ -42,11 +42,13 @@ function Set-CecEntityConfig {
         [Switch]$Publish
     )
 
-    $doc = (Invoke-CecDomainMethod -Method GET -Path $configRequestPath)
-    [Array]$currentEntities = $doc.domainConfig.entities
+    begin {
+        $doc = (Invoke-CecDomainMethod -Method GET -Path $configRequestPath)
+        [Array]$currentEntities = $doc.domainConfig.entities
+    }
 
-    $transformedEntities = ($Entities | Set-CecEntityConfigSuffixValue -Prefix:$Prefix -Suffix:$Suffix) 
-    foreach ($entity in $transformedEntities) {
+    process {
+        $entity = ($_ | Set-CecEntityConfigSuffixValue -Prefix:$Prefix -Suffix:$Suffix) 
         $name = $entity.name
         if ($currentEntities.name -contains $name) {
             $existing = $entities | Where-Object { $_.name -ilike $name }
@@ -57,23 +59,25 @@ function Set-CecEntityConfig {
         }
     }
 
-    $doc.domainConfig.PSObject.Properties.Remove("createdAt")
-    $doc.domainConfig.PSObject.Properties.Remove("live")
-    if ($doc.domainConfig.status -ne "draft") {
-        $doc.domainConfig.version += 1
-        $doc.domainConfig | AddOrSetPropertyValue -PropertyName "status" -Value "draft"
-    }
-    $doc.domainConfig.updatedAt = ([long](Get-Date -AsUTC -UFormat "%s")) * 1000
-    $doc.domainConfig | AddOrSetPropertyValue -PropertyName "operation" -Value "UPDATE"
-
-    if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
-
-        $response = (Invoke-CecDomainMethod -Method PUT -Path $configRequestPath -Body ($doc.domainConfig)) | Select-Object -ExpandProperty "domainConfig"
-        if ($Publish) {
-            $response = Publish-CecEntityConfig
+    end {
+        $doc.domainConfig.PSObject.Properties.Remove("createdAt")
+        $doc.domainConfig.PSObject.Properties.Remove("live")
+        if ($doc.domainConfig.status -ne "draft") {
+            $doc.domainConfig.version += 1
+            $doc.domainConfig | AddOrSetPropertyValue -PropertyName "status" -Value "draft"
         }
+        $doc.domainConfig.updatedAt = ([long](Get-Date -AsUTC -UFormat "%s")) * 1000
+        $doc.domainConfig | AddOrSetPropertyValue -PropertyName "operation" -Value "UPDATE"
 
-        $response
+        if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
+
+            $response = (Invoke-CecDomainMethod -Method PUT -Path $configRequestPath -Body ($doc.domainConfig)) | Select-Object -ExpandProperty "domainConfig"
+            if ($Publish) {
+                $response = Publish-CecEntityConfig
+            }
+
+            $response
+        }
     }
 }
 
@@ -139,6 +143,39 @@ function Get-CecEntity {
     else {
         Write-Error "Entity '$EntityName' not found in specs"
         return $null
+    }
+}
+
+function Set-CecEntity {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]$Entities,
+        [string]$Prefix = $Null,
+        [string]$Suffix = $Null,
+        [switch]$AddPrefix,
+        [Switch]$Force
+    )
+
+    $doc = (Invoke-CecDomainMethod -Method GET -Path $specsRequestPath)
+    $currentEntities = $doc.productSpecs.attributesV2
+
+    $names = $Entities.PSObject.Properties.Name
+    foreach ($name in $names) {
+        $newName = $name
+        if ($AddPrefix) {
+            $newName = Add-Suffix -Value $newName -Prefix $Prefix -Suffix $Suffix
+        }
+
+        $currentEntities | AddOrSetPropertyValue -PropertyName $newName -Value $Entities.$name
+
+        $doc.productSpecs.attributesV2.$newName.items = $Entities.$name.items
+    }
+
+    if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
+        Invoke-CecDomainMethod -Method PUT -Path $specsRequestPath -Body $doc
+    }
+    else {
+        $currentEntities
     }
 }
 

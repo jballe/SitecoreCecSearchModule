@@ -116,7 +116,9 @@
     'Read-CecAttribute',
     'Get-CecSpec',
     'Get-CecEntity',
+    'Set-CecEntity',
     'Write-CecEntity',
+    'Read-CecEntity',
 
     'Get-CecFeatureConfig',
     'Write-CecFeatureConfig',

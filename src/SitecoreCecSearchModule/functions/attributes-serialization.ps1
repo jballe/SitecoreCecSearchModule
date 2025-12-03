@@ -1,7 +1,7 @@
 ﻿function Write-CecEntityConfig {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
-        [Parameter(ValueFromPipeline, Mandatory)][Array]$Entities,
+        [Parameter(ValueFromPipeline, Mandatory)][Array]$Entity,
         [Parameter(Mandatory)][String]$Path,
 
         [Switch]$Force
@@ -14,8 +14,10 @@
     }
 
     process {
-        if ($Force -or $PSCmdlet.ShouldProcess($Path, 'Write entities config to disk')) {
-            Set-Content -Path (Join-Path $Path "entities.json") -Value (ConvertTo-Json -InputObject $Entities -Depth 30)
+        $folderName = $_.name.Replace("{Prefix}","").Replace("{Suffix}", "")
+        $targetPath = Join-Path $Path "${folderName}/entity.json"
+        if ($Force -or $PSCmdlet.ShouldProcess($Path, "Write entities config to disk ${targetPath}")) {
+            Set-Content -Path $targetPath -Value (ConvertTo-Json -InputObject $_ -Depth 30)
         }
     }
 }
@@ -26,10 +28,9 @@ function Read-CecEntityConfig {
         $Path
     )
 
-    [Array]$config = Get-Content -Path (Join-Path $Path "entities.json") | ConvertFrom-Json
+    [Array]$result = Get-ChildItem $Path -Recurse -Depth 2 -Filter "entity.json" | ForEach-Object { Get-Content $_ | ConvertFrom-Json }
 
-    $config
-
+    $result
 }
 
 function Write-CecEntity {
@@ -66,6 +67,23 @@ function Write-CecEntity {
             Write-CecAttribute -Attributes $attributes -Path $folderPath -SkipFiles:$SkipFiles -Force:$Force
         }
     }
+}
+
+function Read-CecEntity {
+    param(
+        [Parameter(Mandatory)][String]$Path,
+        [Switch]$SkipFiles
+    )
+
+    $names = Get-ChildItem $Path -Directory | Select-Object -ExpandProperty Name
+    $result = [PSCustomObject]@{  }
+    foreach($entityName in $names) {
+        $folderPath = Join-Path $Path $entityName
+        $attributes = Read-CecAttribute -Path $folderPath -SkipFiles:$SkipFiles
+        $result | AddOrSetPropertyValue -PropertyName $entityName -Value $attributes
+    }
+
+    $result
 }
 
 function Write-CecAttribute {

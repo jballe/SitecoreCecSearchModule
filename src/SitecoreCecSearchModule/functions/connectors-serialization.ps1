@@ -305,7 +305,12 @@ function Read-Trigger {
     )
 
     $type = $Trigger.type
-    $filePath = Read-ExportedFilePath -BasePath $ConnectorPath -Value $Trigger.$Type
+    if($Trigger.PSObject.Properties.Name -contains $Type) {
+        $filePath = Read-ExportedFilePath -BasePath $ConnectorPath -Value $Trigger.$Type
+    } else {
+        $filePath = $Null
+    }
+
     If ($Null -ne $filePath -and (Test-Path $filePath)) {
         $body = ""
         $method = $Null

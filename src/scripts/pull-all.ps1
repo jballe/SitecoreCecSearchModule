@@ -22,4 +22,4 @@ $domains = @{
 }
 
 Write-Host "Exporting to $Path ..."
-Invoke-GetAndWriteAllCecConfiguration -Path $Path -EnvToken $EnvName -Domains $domains
+Invoke-GetAndWriteAllCecConfiguration -Path $Path -EnvToken $EnvName -Domains $domains -EntityPrefix "${EnvName}".ToLower()

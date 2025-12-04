@@ -17,7 +17,7 @@
         $folderName = $_.name.Replace("{Prefix}", "").Replace("{Suffix}", "")
         $targetFolder = Join-Path $Path $folderName
         If(-not (Test-Path $targetFolder -PathType Container)) { New-Item $targetFolder -ItemType Directory | Out-Null }
-        $targetPath = Join-Path $Path "${targetFolder}/entity.json"
+        $targetPath = Join-Path $targetFolder "entity.json"
         if ($Force -or $PSCmdlet.ShouldProcess($Path, "Write entities config to disk ${targetPath}")) {
             Set-Content -Path $targetPath -Value (ConvertTo-Json -InputObject $_ -Depth 30)
         }

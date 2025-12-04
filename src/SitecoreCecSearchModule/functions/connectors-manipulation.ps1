@@ -6,9 +6,12 @@ function Add-CecConnectorPrefix {
         [String]$Domain = "",
         [String]$ScriptToken = "" ,
         [String]$TextToken = "",
+        [String]$EntityPrefix = "",
+        [String]$EntitySuffix = "",
         [String]$DomainReplacement = "https://domain",
         [String]$ScriptReplacement = "{ENV}",
         [String]$TextReplacement = "{ENV}",
+        [Switch]$Entities,
         [Hashtable]$Domains = @{}
     )
 
@@ -30,6 +33,11 @@ function Add-CecConnectorPrefix {
             $params.ScriptTo = ('"{0}"' -f $ScriptToken)
             $params.ScriptFrom = @( ("'{0}'" -f $ScriptReplacement), ('"{0}"' -f $ScriptReplacement) )
         }
+        if("${EntityPrefix}" -ne "" -or "${EntitySuffix}" -ne "") {
+            $params.AddEntityPrefix = $true
+            $params.EntityPrefix = $EntityPrefix
+            $params.EntitySuffix = $EntitySuffix
+        }
         $Connector | Invoke-CecConnectorReplacement @params | Out-Null
 
         return $Connector
@@ -45,6 +53,8 @@ function Remove-CecConnectorPrefix {
         [String]$Domain = "",
         [String]$ScriptToken = "" ,
         [String]$TextToken = "",
+        [String]$EntityPrefix = "",
+        [String]$EntitySuffix = "",
         [String]$DomainReplacement = "https://domain",
         [String]$ScriptReplacement = "{ENV}",
         [String]$TextReplacement = "{ENV}",
@@ -83,6 +93,12 @@ function Remove-CecConnectorPrefix {
             )
             $params.ScriptTo = ('"{0}"' -f $ScriptReplacement)
         }
+        if("${EntityPrefix}" -ne "" -or "${EntitySuffix}" -ne "") {
+            $params.RemoveEntityPrefix = $true
+            $params.EntityPrefix = $EntityPrefix
+            $params.EntitySuffix = $EntitySuffix
+        }
+
         $result = $Connector `
         | Invoke-CecConnectorReplacement @params `
         | Remove-CecConnectorUserDate
@@ -133,7 +149,11 @@ function Invoke-CecConnectorReplacement {
         [String]$TextFrom,
         [String]$TextTo,
         [Array]$ScriptFrom,
-        [String]$ScriptTo
+        [String]$ScriptTo,
+        [String]$EntityPrefix,
+        [String]$EntitySuffix,
+        [Switch]$RemoveEntityPrefix,
+        [Switch]$AddEntityPrefix
     )
 
     process {
@@ -142,12 +162,13 @@ function Invoke-CecConnectorReplacement {
             return $Connector
         }
 
+        $crawlerTypes = @("webCrawlerConfig", "apiCrawlerConfig")
+
         foreach ($domainValue in $Domains.Keys) {
             $domainTo = $Domains[$domainValue]
             if ("${domainValue}" -ne "" -and "${domainTo}" -ne "") {
                 $Connector.description = $Connector.description.Replace("${domainValue}", "${domainTo}")
 
-                $crawlerTypes = @("webCrawlerConfig", "apiCrawlerConfig")
                 foreach ($crawlerType in $crawlerTypes) {
                     if (-not $Connector.content.PSObject.Properties.Name.Contains('crawler')) {
                         continue
@@ -195,6 +216,68 @@ function Invoke-CecConnectorReplacement {
 
         if ("${TextFrom}" -ne "" -and "${TextTo}" -ne "") {
             $Connector.description = $Connector.description.Replace("${TextFrom}", "${TextTo}")
+        }
+
+        if($AddEntityPrefix -or $RemoveEntityPrefix) {
+            # crawler tagger reference
+            if($Connector.content.PSObject.Properties.Name.Contains('crawler')) {
+                foreach ($crawlerType in $crawlerTypes) {
+
+                    if (-not $Connector.content.crawler.PSObject.Properties.Name.Contains($crawlerType)) {
+                        continue
+                    }
+
+                    $crawlerConfig = $Connector.content.crawler.$crawlerType
+
+                    if ($crawlerConfig.PSObject.Properties.Name -contains "extractors") {
+                        $documents = $crawlerConfig.extractors.documents
+                        foreach ($doc in $documents) {
+                            foreach ($tagger in $doc.taggers) {
+                                if($RemoveEntityPrefix) {
+                                    $tagger.tag = Remove-Suffix -Value $tagger.tag -Prefix $EntityPrefix -Suffix $EntitySuffix
+                                }
+                                if($AddEntityPrefix) {
+                                    $tagger.tag = add-Suffix -Value $tagger.tag -Prefix $EntityPrefix -Suffix $EntitySuffix
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            # entities
+            if ($Connector.content.PSObject.Properties.Name.Contains('entities')) {
+                $names = $Connector.content.entities.PSObject.Properties.Name
+                foreach($name in $names) {
+
+                    $value = $Connector.content.entities.$name
+                    if($value.PSObject.Properties.Name.Contains("tags")) {
+                        $value.tags = @() + ($value.tags | ForEach-Object { 
+                            $tag = $_
+                            if($RemoveEntityPrefix) {
+                                $tag = Remove-Suffix -Value $tag -Prefix $EntityPrefix -Suffix $EntitySuffix
+                            }
+                            if($AddEntityPrefix) {
+                                $tag = Add-Suffix -Value $tag -Prefix $EntityPrefix -Suffix $EntitySuffix
+                            }
+                            $tag
+                        })
+                    }
+
+                    $newName = $name
+                    if($RemoveEntityPrefix) {
+                        $newName = Remove-Suffix -Value $newName -Prefix $EntityPrefix -Suffix $EntitySuffix
+                    }
+                    if($AddEntityPrefix) {
+                        $newName = Add-Suffix -Value $newName -Prefix $EntityPrefix -Suffix $EntitySuffix
+                    }
+
+                    if($newName -ne $name) {
+                        $Connector.content.entities.PSObject.Properties.Remove($name)
+                        $Connector.content.entities | AddOrSetPropertyValue -PropertyName $newName -Value $value
+                    }
+                }
+            }
         }
 
         foreach ($scriptValue in $ScriptFrom) {

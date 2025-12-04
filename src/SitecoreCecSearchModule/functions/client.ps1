@@ -5,6 +5,11 @@ New-Variable -Name ClientDefaultProperties -Scope Global -Force -Value @{
     #SkipCertificateCheck = $true
 }
 
+New-Variable -Name LogDetails -Scope Global -Force -Value @{
+    LogRequest  = $false
+    LogResponse = $false
+}
+
 function Set-CecClientDefaultProperties {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
@@ -14,6 +19,21 @@ function Set-CecClientDefaultProperties {
     )
 
     Set-Variable -Scope Global -Name ClientDefaultProperties -Value $Value | Out-Null
+}
+
+function Set-CecClientLogDetails {
+    [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function')]
+    param(
+        [Switch]$LogRequest,
+        [Switch]$LogResponse
+    )
+
+    Set-Variable -Scope Global -Name LogDetails -Value @{
+        LogRequest  = $LogRequest
+        LogResponse = $LogResponse
+    } | Out-Null
 }
 
 function Set-CecRefreshToken {
@@ -133,10 +153,19 @@ function Invoke-CecDomainMethod {
     if ($Null -ne $Body) {
         $params.Body = $Body | ConvertTo-Json -Depth 15
     }
+    $logDetails = (Get-Variable -Name "LogDetails").Value
+    if ($logDetails.LogRequest) {
+        $params | ConvertTo-Json -Depth 50 | Write-Information
+    }
 
     try {
         Write-Verbose "Invoking CEC Domain method ${Path} at ${url} with ${Method} method"
         $response = Invoke-RestMethod @params @defaultRequestArguments -ErrorAction SilentlyContinue
+
+        if ($logDetails.LogResponse) {
+            $response | ConvertTo-Json -Depth 50 | Write-Information
+        }
+
         return $response
     }
     catch {

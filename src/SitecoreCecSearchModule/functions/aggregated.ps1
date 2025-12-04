@@ -8,14 +8,22 @@ function Invoke-GetAndWriteAllCecConfiguration {
         [string]$Prefix,
         [string]$TextToken,
         [string]$ScriptToken,
+        [string]$EntityPrefix,
+        [string]$EntitySuffix,
         $Domains,
         [Switch]$SkipConnectorReplacement
     )
 
-    Get-CecEntityConfig | Write-CecEntityConfig -Path (Join-Path $Path "entities") -Force
-    Get-CecEntity | Write-CecEntity -Path (Join-Path $Path "entities") -Force
+    Get-CecEntityConfig -EntityPrefix:$EntityPrefix -EntitySuffix:$EntitySuffix -RemovePrefix | Write-CecEntityConfig -Path (Join-Path $Path "entities") -Force
+    Get-CecEntity -EntityPrefix:$EntityPrefix -EntitySuffix:$EntitySuffix -RemovePrefix | Write-CecEntity -Path (Join-Path $Path "entities") -Force
 
-    Invoke-GetAndWriteCecConnectorConfiguration -Path:$Path -EnvToken:$EnvToken -Suffix:$Suffix -Prefix:$Prefix -TextToken:$TextToken -ScriptToken:$ScriptToken -Domains:$Domains -SkipConnectorReplacement:$SkipConnectorReplacement
+    Invoke-GetAndWriteCecConnectorConfiguration -Path:$Path `
+        -EnvToken:$EnvToken `
+        -Suffix:$Suffix -Prefix:$Prefix `
+        -TextToken:$TextToken -ScriptToken:$ScriptToken `
+        -Domains:$Domains `
+        -SkipConnectorReplacement:$SkipConnectorReplacement `
+        -EntityPrefix:$EntityPrefix -EntitySuffix:$EntitySuffix
 
     Get-CecFeatureConfig | Write-CecFeatureConfig -Path $Path
 
@@ -37,7 +45,10 @@ function Invoke-GetAndWriteCecConnectorConfiguration {
         [string]$TextToken,
         [string]$ScriptToken,
         $Domains,
-        [Switch]$SkipConnectorReplacement
+        [Switch]$SkipConnectorReplacement,
+        [string]$EntityPrefix,
+        [string]$EntitySuffix
+
     )
 
     if ("${EnvToken}" -ne "" -and "${Suffix}" -eq "" -and "${Prefix}" -eq "" -and "${TextToken}" -eq "" -and "${ScriptToken}" -eq "") {
@@ -49,7 +60,7 @@ function Invoke-GetAndWriteCecConnectorConfiguration {
     $connectorsPath = Join-Path $Path "connectors"
     $connectors = Get-CecConnectorInfo -Suffix $Suffix -Prefix $Prefix | Get-CecConnector
     if (-not $SkipConnectorReplacement) {
-        $connectors = $connectors | Remove-CecConnectorPrefix -Suffix:$Suffix -Prefix:$Prefix -TextToken:$TextToken -ScriptToken:$ScriptToken -Domains:$Domains
+        $connectors = $connectors | Remove-CecConnectorPrefix -Suffix:$Suffix -Prefix:$Prefix -TextToken:$TextToken -ScriptToken:$ScriptToken -Domains:$Domains -EntityPrefix:$EntityPrefix -EntitySuffix:$EntitySuffix
         $connectors = $connectors | Remove-CecConnectorVercelBypassProtection
     }
 

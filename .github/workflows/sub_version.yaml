@@ -43,7 +43,7 @@ jobs:
 
         $no = $versions.CommitsSinceVersionSourcePadded
         $version = $versions.MajorMinorPatch
-        $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2)
+        $prerelease = ("{0}" -f $versions.NuGetPreReleaseTagV2.Replace("-", ""))
         $branch = $versions.PreReleaseLabel
 
         $fullversion = (@($version, $prerelease) | Where-object { $_ -ne "" }) -join "-"

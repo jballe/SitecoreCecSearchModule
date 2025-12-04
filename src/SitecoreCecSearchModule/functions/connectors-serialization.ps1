@@ -109,6 +109,11 @@ function Read-CecConnector {
     $connector = Get-Content $connectorPath | ConvertFrom-Json
 
     if (-not $SkipFiles) {
+
+        if (-not $connector.content.PSObject.Properties.Name.Contains("crawler")) {
+            continue
+        }
+        
         $crawlerTypes = @("webCrawlerConfig", "apiCrawlerConfig")
         foreach ($crawlerType in $crawlerTypes) {
             if (-not $connector.content.crawler.PSObject.Properties.Name.Contains($crawlerType)) {

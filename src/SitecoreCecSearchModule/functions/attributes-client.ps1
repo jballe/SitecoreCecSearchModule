@@ -15,24 +15,86 @@ function Get-CecEntityConfig {
 
     [Array]$entities = (Invoke-CecDomainMethod -Method GET -Path $configRequestPath).domainConfig.entities
 
-    if("" -ne "${EntityName}") {
+    if ("" -ne "${EntityName}") {
         $entities = $entities | Where-Object { $_.name -ilike "${Prefix}${EntityName}${Suffix}" }
     }
 
-
-    if("" -ne "${Prefix}" -or "" -ne "${Suffix}") {
+    if ("" -ne "${Prefix}" -or "" -ne "${Suffix}") {
         $entities = $entities | Where-Object { $_.name -ilike "${Prefix}*${Suffix}" }
     }
 
-    if($RemovePrefix -and ("" -ne "${Prefix}" -or "" -ne "${Suffix}")) {
-        $entities | ForEach-Object {
-            $obj = $_
-            $obj.displayName = (Remove-Suffix -Value $obj.displayName -Prefix $Prefix -Suffix $Suffix).Trim()
-            $obj.name = (Remove-Suffix -Value $obj.name -Prefix $Prefix -Suffix $Suffix)
-        }
+    if ($RemovePrefix -and ("" -ne "${Prefix}" -or "" -ne "${Suffix}")) {
+        $entities | Set-CecEntityConfigSuffixTemplate -Prefix:$Prefix -Suffix:$Suffix
     }
 
     $entities
+}
+
+function Set-CecEntityConfig {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]
+        [Array]$Entities,
+        [string]$Prefix = $Null,
+        [string]$Suffix = $Null,
+
+        [Switch]$Force,
+        [Switch]$Publish
+    )
+
+    begin {
+        $doc = (Invoke-CecDomainMethod -Method GET -Path $configRequestPath)
+        [Array]$currentEntities = $doc.domainConfig.entities
+    }
+
+    process {
+        $entity = ($_ | Set-CecEntityConfigSuffixValue -Prefix:$Prefix -Suffix:$Suffix) 
+        $name = $entity.name
+        if ($currentEntities.name -contains $name) {
+            $existing = $entities | Where-Object { $_.name -ilike $name }
+            $existing.displayName = $entity.name
+        }
+        else {
+            $doc.domainConfig.entities = $currentEntities + @($Entity)
+        }
+    }
+
+    end {
+        $doc.domainConfig.PSObject.Properties.Remove("createdAt")
+        $doc.domainConfig.PSObject.Properties.Remove("live")
+        if ($doc.domainConfig.status -ne "draft") {
+            $doc.domainConfig.version += 1
+            $doc.domainConfig | AddOrSetPropertyValue -PropertyName "status" -Value "draft"
+        }
+        $doc.domainConfig.updatedAt = ([long](Get-Date -AsUTC -UFormat "%s")) * 1000
+        $doc.domainConfig | AddOrSetPropertyValue -PropertyName "operation" -Value "UPDATE"
+
+        if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
+
+            $response = (Invoke-CecDomainMethod -Method PUT -Path $configRequestPath -Body ($doc.domainConfig)) | Select-Object -ExpandProperty "domainConfig"
+            if ($Publish) {
+                $response = Publish-CecEntityConfig
+            }
+
+            $response
+        }
+    }
+}
+
+function Publish-CecEntityConfig {
+    Invoke-CecDomainMethod -Method POST -Path "${configRequestPath}/versions/draft?"
+}
+
+function Remove-CecEntityConfigDraft {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    param(
+        [Switch]$Force
+    )
+
+    if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
+
+        Invoke-CecDomainMethod -Method DELETE -Path "${configRequestPath}/versions/draft?"
+    }
 }
 
 function Get-CecEntity {
@@ -49,17 +111,18 @@ function Get-CecEntity {
         $name = "${Prefix}${EntityName}${Suffix}"
         if ($entities.PSObject.Properties.Name -notcontains $name) {
             return $Null
-        } else {
+        }
+        else {
             return $entities.$name
         }
     }
 
-    if("" -ne "${Prefix}" -or "" -ne "${Suffix}") {
+    if ("" -ne "${Prefix}" -or "" -ne "${Suffix}") {
         $result = [PSCustomObject]@{}
-        $names = $entities.PSObject.Properties.Name | Where-Object { $_ -ilike "${Prefix}*${Suffix}"}
+        $names = $entities.PSObject.Properties.Name | Where-Object { $_ -ilike "${Prefix}*${Suffix}" }
         foreach ($name in $names) {
             $newName = $name
-            if($RemovePrefix) {
+            if ($RemovePrefix) {
                 $newName = Remove-Suffix -Value $newName -Prefix $Prefix -Suffix $Suffix
             }
 
@@ -80,6 +143,41 @@ function Get-CecEntity {
     else {
         Write-Error "Entity '$EntityName' not found in specs"
         return $null
+    }
+}
+
+function Set-CecEntity {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(ValueFromPipeline, Mandatory)]$Entities,
+        [string]$Prefix = $Null,
+        [string]$Suffix = $Null,
+        [switch]$AddPrefix,
+        [Switch]$Force
+    )
+
+    process {
+        $doc = (Invoke-CecDomainMethod -Method GET -Path $specsRequestPath)
+        $currentEntities = $doc.productSpecs.attributesV2
+
+        $names = $Entities.PSObject.Properties.Name
+        foreach ($name in $names) {
+            $newName = $name
+            if ($AddPrefix) {
+                $newName = Add-Suffix -Value $newName -Prefix $Prefix -Suffix $Suffix
+            }
+
+            $currentEntities | AddOrSetPropertyValue -PropertyName $newName -Value $Entities.$name
+
+            $doc.productSpecs.attributesV2.$newName.items = $Entities.$name.items
+        }
+
+        if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
+            Invoke-CecDomainMethod -Method PUT -Path $specsRequestPath -Body $doc
+        }
+        else {
+            $currentEntities
+        }
     }
 }
 

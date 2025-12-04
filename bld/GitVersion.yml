@@ -8,5 +8,7 @@ branches:
     tag: beta
   pull-request:
     tag: alphapr{Number} 
+    mode: ContinuousDeployment
   feature:
     tag: alpha{BranchName}
+    mode: ContinuousDeployment

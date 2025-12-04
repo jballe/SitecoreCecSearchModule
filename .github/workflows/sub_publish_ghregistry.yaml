@@ -76,7 +76,8 @@ jobs:
         
         Publish-Module -Path ./src/SitecoreCecSearchModule `
           -Repository $repositoryName `
-          -NuGetApiKey "${{ github.token }}"
+          -NuGetApiKey "${{ github.token }}" `
+          -SkipAutomaticTags
 
   # verify:
   #   name: Verify published package

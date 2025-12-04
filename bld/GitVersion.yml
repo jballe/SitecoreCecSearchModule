@@ -1,9 +1,11 @@
 mode: ContinuousDelivery
 branches:
   main:
+    mode: ContinuousDeployment
     regex: main
     tag: rc
   develop:
+    mode: ContinuousDeployment
     regex: develop
     tag: beta
   pull-request:

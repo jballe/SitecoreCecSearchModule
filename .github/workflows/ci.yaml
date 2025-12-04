@@ -41,7 +41,7 @@ jobs:
 
   publish_rc:
     name: RC
-    if: github.ref == 'refs/tags/main'
+    if: ${{ github.ref }} == 'refs/tags/main'
     needs:
       - build
       - verify

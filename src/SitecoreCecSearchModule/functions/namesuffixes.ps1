@@ -8,7 +8,7 @@ function SuffixIsSpecified {
 }
 
 function Remove-Suffix {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope='Function')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function')]
     Param(
         [string]$Value,
         [string]$Prefix,
@@ -35,7 +35,7 @@ function Add-Suffix {
     )
 
     $spacer = ""
-    if($AddSpace) {
+    if ($AddSpace) {
         $spacer = " "
     }
 
@@ -68,7 +68,8 @@ function Add-SuffixTemplate {
     $Value
 }
 
-function Set-SuffixTemplateValues {
+function Set-SuffixTemplateValue {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'false positive')]
     Param(
         [Parameter(ValueFromPipeline, Mandatory)]
         [string]$Value,
@@ -76,7 +77,9 @@ function Set-SuffixTemplateValues {
         [string]$Suffix
     )
 
-    $Value = $Value.Replace("{Prefix}", $Prefix).Replace("{Suffix}", $Suffix)
+    process {
+        $Value = $Value.Replace("{Prefix}", $Prefix).Replace("{Suffix}", $Suffix)
 
-    $Value
+        $Value
+    }
 }

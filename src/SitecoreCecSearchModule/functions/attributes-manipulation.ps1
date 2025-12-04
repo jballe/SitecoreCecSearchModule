@@ -1,4 +1,5 @@
 ﻿function Set-CecEntityConfigSuffixTemplate {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'false positive')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]
         $Entity,
@@ -16,6 +17,7 @@
 }
 
 function Set-CecEntityConfigSuffixValue {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'false positive')]
     param(
         [Parameter(ValueFromPipeline, Mandatory)]
         $Entity,
@@ -26,8 +28,8 @@ function Set-CecEntityConfigSuffixValue {
 
     process {
 
-        $Entity.displayName = Set-SuffixTemplateValues -Value $Entity.displayName -Prefix $Prefix -Suffix $Suffix
-        $Entity.name = Set-SuffixTemplateValues -Value $Entity.name -Prefix "${Prefix}".ToLower() -Suffix "${Suffix}".ToLower()
+        $Entity.displayName = Set-SuffixTemplateValue -Value $Entity.displayName -Prefix $Prefix -Suffix $Suffix
+        $Entity.name = Set-SuffixTemplateValue -Value $Entity.name -Prefix "${Prefix}".ToLower() -Suffix "${Suffix}".ToLower()
 
         $Entity
     }

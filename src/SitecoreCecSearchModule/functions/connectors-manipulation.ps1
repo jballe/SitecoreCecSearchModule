@@ -11,7 +11,6 @@ function Add-CecConnectorPrefix {
         [String]$DomainReplacement = "https://domain",
         [String]$ScriptReplacement = "{ENV}",
         [String]$TextReplacement = "{ENV}",
-        [Switch]$Entities,
         [Hashtable]$Domains = @{}
     )
 

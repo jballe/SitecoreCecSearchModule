@@ -156,26 +156,28 @@ function Set-CecEntity {
         [Switch]$Force
     )
 
-    $doc = (Invoke-CecDomainMethod -Method GET -Path $specsRequestPath)
-    $currentEntities = $doc.productSpecs.attributesV2
+    process {
+        $doc = (Invoke-CecDomainMethod -Method GET -Path $specsRequestPath)
+        $currentEntities = $doc.productSpecs.attributesV2
 
-    $names = $Entities.PSObject.Properties.Name
-    foreach ($name in $names) {
-        $newName = $name
-        if ($AddPrefix) {
-            $newName = Add-Suffix -Value $newName -Prefix $Prefix -Suffix $Suffix
+        $names = $Entities.PSObject.Properties.Name
+        foreach ($name in $names) {
+            $newName = $name
+            if ($AddPrefix) {
+                $newName = Add-Suffix -Value $newName -Prefix $Prefix -Suffix $Suffix
+            }
+
+            $currentEntities | AddOrSetPropertyValue -PropertyName $newName -Value $Entities.$name
+
+            $doc.productSpecs.attributesV2.$newName.items = $Entities.$name.items
         }
 
-        $currentEntities | AddOrSetPropertyValue -PropertyName $newName -Value $Entities.$name
-
-        $doc.productSpecs.attributesV2.$newName.items = $Entities.$name.items
-    }
-
-    if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
-        Invoke-CecDomainMethod -Method PUT -Path $specsRequestPath -Body $doc
-    }
-    else {
-        $currentEntities
+        if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
+            Invoke-CecDomainMethod -Method PUT -Path $specsRequestPath -Body $doc
+        }
+        else {
+            $currentEntities
+        }
     }
 }
 

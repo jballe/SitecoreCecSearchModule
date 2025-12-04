@@ -14,7 +14,7 @@
     }
 
     process {
-        $folderName = $_.name.Replace("{Prefix}","").Replace("{Suffix}", "")
+        $folderName = $_.name.Replace("{Prefix}", "").Replace("{Suffix}", "")
         $targetPath = Join-Path $Path "${folderName}/entity.json"
         if ($Force -or $PSCmdlet.ShouldProcess($Path, "Write entities config to disk ${targetPath}")) {
             Set-Content -Path $targetPath -Value (ConvertTo-Json -InputObject $_ -Depth 30)
@@ -28,9 +28,11 @@ function Read-CecEntityConfig {
         $Path
     )
 
-    [Array]$result = Get-ChildItem $Path -Recurse -Depth 2 -Filter "entity.json" | ForEach-Object { Get-Content $_ | ConvertFrom-Json }
+    process {
+        [Array]$result = Get-ChildItem $Path -Recurse -Depth 2 -Filter "entity.json" | ForEach-Object { Get-Content $_ | ConvertFrom-Json }
 
-    $result
+        $result
+    }
 }
 
 function Write-CecEntity {
@@ -61,7 +63,7 @@ function Write-CecEntity {
         }
 
         $names = $Entities.PSObject.Properties.Name
-        foreach($entityName in $names) {
+        foreach ($entityName in $names) {
             $folderPath = Join-Path $Path $entityName
             $attributes = $Entities.$entityName
             Write-CecAttribute -Attributes $attributes -Path $folderPath -SkipFiles:$SkipFiles -Force:$Force
@@ -77,7 +79,7 @@ function Read-CecEntity {
 
     $names = Get-ChildItem $Path -Directory | Select-Object -ExpandProperty Name
     $result = [PSCustomObject]@{  }
-    foreach($entityName in $names) {
+    foreach ($entityName in $names) {
         $folderPath = Join-Path $Path $entityName
         $attributes = Read-CecAttribute -Path $folderPath -SkipFiles:$SkipFiles
         $result | AddOrSetPropertyValue -PropertyName $entityName -Value $attributes

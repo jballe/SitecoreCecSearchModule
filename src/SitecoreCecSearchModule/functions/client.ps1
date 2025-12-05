@@ -156,7 +156,7 @@ function Invoke-CecDomainMethod {
     }
     $logDetails = (Get-Variable -Name "LogDetails").Value
     if ($logDetails.LogRequest) {
-        $params | ConvertTo-Json -Depth 50 | Write-Host
+        $params | ConvertTo-Json -Depth 50 | Write-Information
     }
 
     try {
@@ -164,7 +164,7 @@ function Invoke-CecDomainMethod {
         $response = Invoke-RestMethod @params @defaultRequestArguments -ErrorAction SilentlyContinue
 
         if ($logDetails.LogResponse) {
-            $response | ConvertTo-Json -Depth 50 | Write-Host
+            $response | ConvertTo-Json -Depth 50 | Write-Information
         }
 
         return $response

@@ -31,8 +31,8 @@ function Set-CecClientLogDetails {
     )
 
     Set-Variable -Scope Global -Name LogDetails -Value @{
-        LogRequest  = $LogRequest
-        LogResponse = $LogResponse
+        LogRequest  = $LogRequest.IsPresent
+        LogResponse = $LogResponse.IsPresent
     } | Out-Null
 }
 
@@ -98,6 +98,7 @@ function Invoke-CecGlobalMethod {
         Headers     = @{ Authorization = "Bearer ${token}" }
         ContentType = "application/json"
     }
+    
     Write-Verbose "Invoking global method ${Path}"
     Invoke-RestMethod @params @defaultRequestArguments -Body:$Body
 }
@@ -155,7 +156,7 @@ function Invoke-CecDomainMethod {
     }
     $logDetails = (Get-Variable -Name "LogDetails").Value
     if ($logDetails.LogRequest) {
-        $params | ConvertTo-Json -Depth 50 | Write-Information
+        $params | ConvertTo-Json -Depth 50 | Write-Host
     }
 
     try {
@@ -163,7 +164,7 @@ function Invoke-CecDomainMethod {
         $response = Invoke-RestMethod @params @defaultRequestArguments -ErrorAction SilentlyContinue
 
         if ($logDetails.LogResponse) {
-            $response | ConvertTo-Json -Depth 50 | Write-Information
+            $response | ConvertTo-Json -Depth 50 | Write-Host
         }
 
         return $response

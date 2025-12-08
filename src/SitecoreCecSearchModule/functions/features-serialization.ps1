@@ -8,7 +8,7 @@ function Write-CecFeatureConfig {
 
     begin {
         if ($Subfolder) {
-            $folder = Join-Path $Path "features" 
+            $folder = Join-Path $Path "features"
         }
         else {
             $folder = Resolve-Path $Path
@@ -40,7 +40,7 @@ function Write-CecFeatureConfig {
                     Set-Content -Path $filename -Value ($obj | ConvertTo-Json -Depth 15)
                 }
             }
-            
+
             $Features.$area = "Exported to $relativeFolder"
             Write-Verbose "### Writing $area completed"
         }

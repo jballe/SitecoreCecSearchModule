@@ -113,7 +113,7 @@ function Read-CecConnector {
         if (-not $connector.content.PSObject.Properties.Name.Contains("crawler")) {
             continue
         }
-        
+
         $crawlerTypes = @("webCrawlerConfig", "apiCrawlerConfig")
         foreach ($crawlerType in $crawlerTypes) {
             if (-not $connector.content.crawler.PSObject.Properties.Name.Contains($crawlerType)) {

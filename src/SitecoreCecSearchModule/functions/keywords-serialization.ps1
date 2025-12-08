@@ -9,7 +9,7 @@ function Write-CecKeywordInfo {
 
     begin {
         if ($Subfolder) {
-            $folder = Join-Path $Path "keywords" 
+            $folder = Join-Path $Path "keywords"
         }
         else {
             $folder = Resolve-Path $Path

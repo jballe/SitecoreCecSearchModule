@@ -65,7 +65,7 @@ function Remove-CecConnectorPrefix {
         if($Domains -eq $Null) {
             $Domains = [Hashtable]@{}
         }
-        
+
         if ("${Domain}" -ne "" -and "${DomainReplacement}" -ne "") {
             $Domains[$DomainReplacement] = $Domain
         }
@@ -135,7 +135,7 @@ function Set-CecConnectorCrawlerSchedule {
         if ($Null -ne $Interval) {
             $Connector.content.crawler.recurrence.interval = $Interval
         }
-        
+
         return $Connector
     }
 }
@@ -251,7 +251,7 @@ function Invoke-CecConnectorReplacement {
 
                     $value = $Connector.content.entities.$name
                     if($value.PSObject.Properties.Name.Contains("tags")) {
-                        $value.tags = @() + ($value.tags | ForEach-Object { 
+                        $value.tags = @() + ($value.tags | ForEach-Object {
                             $tag = $_
                             if($RemoveEntityPrefix) {
                                 $tag = Remove-Suffix -Value $tag -Prefix $EntityPrefix -Suffix $EntitySuffix

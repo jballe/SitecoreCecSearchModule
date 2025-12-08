@@ -13,14 +13,14 @@ function Invoke-CecPortalAuthentication {
     $response = Invoke-WebRequest -WebSession $CecLoginSession -Uri "https://account.sitecorecloud.io/login/?redirect=https%3A%2F%2Fcec.sitecorecloud.io&scope=%5B%22portal%22%2C%22search-rec%22%2C%22admin%22%2C%22internal%22%2C%22util%22%2C%22discover%22%2C%22event%22%2C%22ingestion%22%5D"  -Method GET -UseBasicParsing @defaultRequestArguments
     # Fetch chuncks
     Write-Information "Requesting account script bundles to find IDP definitions..."
-    $idpDefinition = ([regex]"`"(/_next/[^`"]+.js)`"").Matches($response.Content) | ForEach-Object { 
+    $idpDefinition = ([regex]"`"(/_next/[^`"]+.js)`"").Matches($response.Content) | ForEach-Object {
         $url = "https://account.sitecorecloud.io$($_.Groups[1].Value)"
         $content = Invoke-RestMethod -Uri $url @defaultRequestArguments
         if ($content -match "prod:\s*\{.*?oauth2:\s*(\{sitecoreIdp:\s*\{.*?\}\})") {
             $Matches[1]
         }
     } | ConvertFrom-Json | Select-Object -ExpandProperty sitecoreIdp
-    
+
     if($null -eq $idpDefinition) {
         throw "Could not find IDP definition in the response, please check the login URL or the response content."
     } else {
@@ -32,11 +32,11 @@ function Invoke-CecPortalAuthentication {
     $cookie = [System.Net.Cookie]::new('code_verifier', $pkce.Verifier, "/", ".sitecorecloud.io")
     $CecLoginSession.Cookies.Add($cookie)
     $url = $idpDefinition.authorizeUrl + "?response_type=code" +
-    "&client_id=" + $idpDefinition.clientId + 
-    "&redirect_uri=" + [uri]::EscapeDataString($idpDefinition.redirectUrl) + 
-    "&scope=" + [uri]::EscapeDataString($idpDefinition.scope) + 
-    "&audience=" + [uri]::EscapeDataString($idpDefinition.audience) + 
-    "&code_challenge=" + $pkce.Challenge + 
+    "&client_id=" + $idpDefinition.clientId +
+    "&redirect_uri=" + [uri]::EscapeDataString($idpDefinition.redirectUrl) +
+    "&scope=" + [uri]::EscapeDataString($idpDefinition.scope) +
+    "&audience=" + [uri]::EscapeDataString($idpDefinition.audience) +
+    "&code_challenge=" + $pkce.Challenge +
     "&code_challenge_method=S256" +
     "&product_codes=Search%2CDiscover"
     if ("${organizationId}" -ne "") {
@@ -107,7 +107,7 @@ function CreatePkceValues {
     $hash = $hashAlgo.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($codeVerifier))
     $b64Hash = [System.Convert]::ToBase64String($hash)
     $code_challenge = $b64Hash.Substring(0, 43)
-    
+
     # Encode by replacing characters
     $code_challenge = $code_challenge.Replace("/","_")
     $code_challenge = $code_challenge.Replace("+","-")

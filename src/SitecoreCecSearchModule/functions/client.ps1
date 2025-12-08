@@ -98,7 +98,7 @@ function Invoke-CecGlobalMethod {
         Headers     = @{ Authorization = "Bearer ${token}" }
         ContentType = "application/json"
     }
-    
+
     Write-Verbose "Invoking global method ${Path}"
     Invoke-RestMethod @params @defaultRequestArguments -Body:$Body
 }

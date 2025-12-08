@@ -133,7 +133,7 @@ function Remove-CecCrawlerHeader {
         foreach ($obj in $requestObjs | Where-Object { $_ -ne $Null }) {
             if ($obj.PSObject.Properties.Name -contains "headers" -and $obj.headers.PSObject.Properties.Name -contains $HeaderKey) {
                 $obj.headers.PSObject.Properties.Remove($HeaderKey)
-            }    
+            }
         }
 
         $Connector

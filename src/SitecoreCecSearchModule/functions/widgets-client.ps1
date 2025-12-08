@@ -22,7 +22,7 @@ function Get-CecWidgetInfo {
         if ($HtmlBlock) { $types += @{ "type" = "html_block" } }
         if ($EmailRecommendation) { $types += @{ "type" = "email_recommendation" } }
         if ($TriggerStrip) { $types += @{ "type" = "trigger_strip" } }
-        
+
         if ($types.Length -gt 0) {
             $json = @{
                 "`$or" = $types

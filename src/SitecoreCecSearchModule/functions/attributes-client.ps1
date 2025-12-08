@@ -48,7 +48,7 @@ function Set-CecEntityConfig {
     }
 
     process {
-        $entity = ($_ | Set-CecEntityConfigSuffixValue -Prefix:$Prefix -Suffix:$Suffix) 
+        $entity = ($_ | Set-CecEntityConfigSuffixValue -Prefix:$Prefix -Suffix:$Suffix)
         $name = $entity.name
         if ($currentEntities.name -contains $name) {
             $existing = $entities | Where-Object { $_.name -ilike $name }
@@ -186,7 +186,7 @@ function Get-CecAttribute {
     param(
         [string]$EntityName = "content"
     )
-    
+
     (Invoke-CecDomainMethod -Method GET -Path $specsRequestPath).productSpecs.attributesV2 | Select-object -ExpandProperty $EntityName
 }
 

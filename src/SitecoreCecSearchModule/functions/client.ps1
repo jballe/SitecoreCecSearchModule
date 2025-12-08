@@ -159,35 +159,45 @@ function Invoke-CecDomainMethod {
         $params | ConvertTo-Json -Depth 50 | Write-Information
     }
 
+    $response = $Null
     try {
         Write-Verbose "Invoking CEC Domain method ${Path} at ${url} with ${Method} method"
         $response = Invoke-RestMethod @params @defaultRequestArguments -ErrorAction SilentlyContinue
-
-        if ($logDetails.LogResponse) {
-            $response | ConvertTo-Json -Depth 50 | Write-Information
-        }
-
-        return $response
     }
     catch {
+        $responseError = $_
+        $responseException = $responseError.Exception
         if ($Null -ne $_.Exception -and $_.Exception.PSObject.Properties.Name.Contains("Response")) {
+            $responseException = $_.Exception
             try {
-                $response = $_.Exception.Response
-                $errorContent = $response.Content
-                $errorDetails = $errorContent.ReadAsStringAsync()
-                $errorObj = $errorDetails | ConvertFrom-Json
-                $errMessage = $errorObj.message
-                $errCode = $errorObj.code
+                $responseObj = $responseException.Response
+                $responseStream = $responseObj.Content
+                $responseContent = $responseStream.ReadAsStringAsync().Result
+                $response = $responseContent | ConvertFrom-Json
             }
             catch {
-                $errMessage = ""
-                $errCode = ""
+                Write-Error ("Error during {1} request to {0} was: {2} (cannot read response body)" -f $params.Uri, $params.Method, $responseException.Message)
+                $response = $Null
             }
-
-            Write-Error ("Error during {1} request to {0} gave status {2} error was: {3} ({4})" -f $params.Uri, $params.Method, $response.StatusCode, $errMessage, $errCode)
         }
         else {
-            Write-Error ("Error during {1} request to {0} was: {2}" -f $params.Uri, $params.Method, $_.Exception.Message)
+            Write-Error ("Error during {1} request to {0} was: {2}" -f $params.Uri, $params.Method, $responseException.Message)
+            $response = $Null
         }
     }
+
+    if ($Null -ne $response -and $logDetails.LogResponse) {
+        $response | ConvertTo-Json -Depth 50 | Write-Information
+    }
+
+    if ($Null -ne $response -and $response.PSObject.Properties.Name -contains "error-id" -and $response.PSObject.Properties.Name -contains "message") {
+        $errorObj = $response
+        $errMessage = $errorObj.message
+        $errCode = $errorObj.code
+        $errType = $errorObj.type
+
+        Write-Error ("Error during {1} request to {0} error type {2} was {3} ({4})" -f $params.Uri, $params.Method, $errType, $errMessage, $errCode)
+    }
+
+    return $response
 }

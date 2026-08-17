@@ -60,7 +60,6 @@ function Set-CecEntityConfig {
     }
 
     end {
-        $doc.domainConfig.PSObject.Properties.Remove("createdAt")
         $doc.domainConfig.PSObject.Properties.Remove("live")
         if ($doc.domainConfig.status -ne "draft") {
             $doc.domainConfig.version += 1
@@ -170,10 +169,24 @@ function Set-CecEntity {
             $currentEntities | AddOrSetPropertyValue -PropertyName $newName -Value $Entities.$name
 
             $doc.productSpecs.attributesV2.$newName.items = $Entities.$name.items
+
+            $verticalId = $Entities.$name.entity.verticalId
+            if($doc.productSpecs.usesPerEntity.PSObject.Properties -notcontains $newName) {
+                $doc.productSpecs.usesPerEntity | AddOrSetPropertyValue -PropertyName $newName -Value @{ verticalId = $verticalId }
+            } else {
+                $doc.productSpecs.usesPerEntity.$newName | AddOrSetPropertyValue -PropertyName verticalId -Value  $verticalId
+            }
         }
 
+        $doc.productSpecs.PSObject.Properties.Remove("live")
+        if ($doc.productSpecs.status -ne "draft") {
+            $doc.productSpecs.version += 1
+            $doc.productSpecs | AddOrSetPropertyValue -PropertyName "status" -Value "draft"
+        }
+        $doc.productSpecs.updatedAt = ([long](Get-Date -AsUTC -UFormat "%s")) * 1000
+
         if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
-            Invoke-CecDomainMethod -Method PUT -Path $specsRequestPath -Body $doc
+            Invoke-CecDomainMethod -Method PUT -Path $specsRequestPath -Body $doc.productSpecs
         }
         else {
             $currentEntities

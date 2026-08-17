@@ -110,36 +110,35 @@ function Read-CecConnector {
 
     if (-not $SkipFiles) {
 
-        if (-not $connector.content.PSObject.Properties.Name.Contains("crawler")) {
-            continue
-        }
+        if ($connector.content.PSObject.Properties.Name.Contains("crawler")) {
 
-        $crawlerTypes = @("webCrawlerConfig", "apiCrawlerConfig")
-        foreach ($crawlerType in $crawlerTypes) {
-            if (-not $connector.content.crawler.PSObject.Properties.Name.Contains($crawlerType)) {
-                continue
-            }
+            $crawlerTypes = @("webCrawlerConfig", "apiCrawlerConfig")
+            foreach ($crawlerType in $crawlerTypes) {
+                if (-not $connector.content.crawler.PSObject.Properties.Name.Contains($crawlerType)) {
+                    continue
+                }
 
-            $crawlerConfig = $connector.content.crawler.$crawlerType
-            if ($crawlerConfig.PSObject.Properties.Name -contains "extractors") {
-                $documents = $crawlerConfig.extractors.documents
-                foreach ($doc in $documents) {
-                    foreach ($tagger in $doc.taggers) {
-                        Read-Tagger -ConnectorPath $Path -Tagger $tagger
+                $crawlerConfig = $connector.content.crawler.$crawlerType
+                if ($crawlerConfig.PSObject.Properties.Name -contains "extractors") {
+                    $documents = $crawlerConfig.extractors.documents
+                    foreach ($doc in $documents) {
+                        foreach ($tagger in $doc.taggers) {
+                            Read-Tagger -ConnectorPath $Path -Tagger $tagger
+                        }
+                    }
+
+                    if ($crawlerConfig.extractors.PSObject.Properties.Name -contains "locales") {
+                        foreach ($locale in $crawlerConfig.extractors.locales) {
+                            Read-LocaleExtractor -ConnectorPath $Path -LocaleObj $locale
+                        }
                     }
                 }
 
-                if ($crawlerConfig.extractors.PSObject.Properties.Name -contains "locales") {
-                    foreach ($locale in $crawlerConfig.extractors.locales) {
-                        Read-LocaleExtractor -ConnectorPath $Path -LocaleObj $locale
+                if ($crawlerConfig.PSObject.Properties.Name -contains "triggers") {
+                    $triggers = $crawlerConfig.triggers
+                    foreach ($trigger in $triggers) {
+                        Read-Trigger -ConnectorPath $Path -Trigger $trigger
                     }
-                }
-            }
-
-            if ($crawlerConfig.PSObject.Properties.Name -contains "triggers") {
-                $triggers = $crawlerConfig.triggers
-                foreach ($trigger in $triggers) {
-                    Read-Trigger -ConnectorPath $Path -Trigger $trigger
                 }
             }
         }
@@ -305,9 +304,10 @@ function Read-Trigger {
     )
 
     $type = $Trigger.type
-    if($Trigger.PSObject.Properties.Name -contains $Type) {
+    if ($Trigger.PSObject.Properties.Name -contains $Type) {
         $filePath = Read-ExportedFilePath -BasePath $ConnectorPath -Value $Trigger.$Type
-    } else {
+    }
+    else {
         $filePath = $Null
     }
 

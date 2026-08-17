@@ -160,5 +160,11 @@ function Read-CecAttribute {
         $config = Get-Content -Path (Join-Path $Path "attributes.json") | ConvertFrom-Json
     }
 
+    $entityPath = (Join-path $Path "entity.json")
+    If(test-Path $entityPath) {
+        $entity = Get-Content $entityPath | ConvertFrom-Json
+        $config | AddOrSetPropertyValue -PropertyName "entity" -Value $entity
+    }
+
     $config
 }

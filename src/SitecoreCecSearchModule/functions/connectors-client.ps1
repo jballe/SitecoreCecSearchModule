@@ -101,6 +101,8 @@ function Set-CecConnector {
                     Write-Warning ("Could not publish connector {1} ({2}) due to {0}" -f $_, $Connector.name, $id)
                 }
             }
+
+            $result.connector
         }
         catch {
             Write-Error ("Error during Set-CecConnector due to {0}" -f $_)
@@ -129,17 +131,21 @@ function Remove-CecConnector {
 function Publish-CecConnector {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param(
-        [Parameter(Mandatory)]$ConnectorId,
+        [Parameter(Mandatory, ValueFromPipeline)]$Connector,
         [Switch]$Force
     )
 
-    $url = "/microservices/common-editor/connectors/${ConnectorId}/versions/draft"
-    if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
-        $result = Invoke-CecDomainMethod -Path $url -Method POST
-        $Connector | Update-CecConnectorModelWithId -ConnectorWithIds $result.connector
-    }
-    else {
-        Write-Information "Would have made POST request to $url"
+    process {
+        $ConnectorId = $Connector.connectorId
+        $url = "/microservices/common-editor/connectors/${ConnectorId}/versions/draft"
+        if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
+            # TODO: Something about already published connectors
+            $result = Invoke-CecDomainMethod -Path $url -Method POST
+            $Connector | Update-CecConnectorModelWithId -ConnectorWithIds $result.connector
+        }
+        else {
+            Write-Information "Would have made POST request to $url"
+        }
     }
 }
 
@@ -172,12 +178,13 @@ function Start-CecConnectorRescan {
         $urlPath = "/microservices/job-orchestrator/jobs"
         if ($Force -or $PSCmdlet.ShouldProcess("SitecoreCeCSearch", 'Send request to service')) {
             $result = Invoke-CecDomainMethod -Path $urlPath -Method POST -Body $body
-            if($result.PSObject.Properties.Name.Contains("message")) {
+            if ($result.PSObject.Properties.Name.Contains("message")) {
                 $data = $result
                 $result = $result.data.runningJob
                 $result | Add-Member -Name "message" -Type NoteProperty -Value $data.message
                 $result | Add-Member -Name "errorId" -Type NoteProperty -Value $data."error-id"
-            } else {
+            }
+            else {
                 $result = $result.job
                 $result | Add-Member -Name "message" -Type NoteProperty -Value $null
                 $result | Add-Member -Name "errorId" -Type NoteProperty -Value $null
